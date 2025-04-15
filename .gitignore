@@ -1,0 +1,25 @@
+# ignore all
+/*
+
+# select folders
+!/common_components/
+!/common_components/**
+!/main/
+!/main/**
+!/managed_components/
+!/managed_components/**
+!/spiffs/
+!/spiffs/**
+
+
+# select files
+!.clangd
+!.clang-format
+!.cproject
+!.project
+!CMakeLists.txt
+!dependencies.lock
+!partitions.csv
+!version.txt
+!sdkconfig
+!.gitignore
