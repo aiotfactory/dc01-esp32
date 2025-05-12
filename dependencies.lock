@@ -1,0 +1,105 @@
+dependencies:
+  camera:
+    dependencies: []
+    source:
+      path: D:\project\datacollection\Espressif2\projects\dc01_simple\common_components\camera
+      type: local
+    version: '*'
+  esp32-camera:
+    dependencies: []
+    source:
+      path: D:\project\datacollection\Espressif2\projects\dc01_simple\common_components\esp32-camera
+      type: local
+    version: 2.0.15
+  espressif/cmake_utilities:
+    component_hash: 351350613ceafba240b761b4ea991e0f231ac7a9f59a9ee901f751bddc0bb18f
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=4.1'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 0.5.3
+  espressif/jsmn:
+    component_hash: d80350c41bbaa827c98a25b6072df00884e72f54885996fab4a4f0aebce6b6c3
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=4.3'
+    source:
+      registry_url: https://components.espressif.com
+      type: service
+    version: 1.1.0
+  espressif/json_parser:
+    component_hash: d74b81729ad06ec11ff5eb5b1b0d7df1d00e6027fc11471f4b139c70dcf1b1e4
+    dependencies:
+    - name: espressif/jsmn
+      registry_url: https://components.espressif.com
+      require: private
+      rules:
+      - if: idf_version >=5.0
+      version: ~1.1
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 1.0.3
+  idf:
+    source:
+      type: idf
+    version: 5.3.2
+  iot_usbh:
+    dependencies:
+    - name: idf
+      version: '>=4.4.1'
+    - name: espressif/cmake_utilities
+      version: 0.*
+    source:
+      path: D:\project\datacollection\Espressif2\projects\dc01_simple\common_components\iot_usbh
+      type: local
+    targets:
+    - esp32s2
+    - esp32s3
+    version: 0.2.1
+  iot_usbh_cdc:
+    dependencies:
+    - name: idf
+      version: '>=4.4.1'
+    - name: espressif/cmake_utilities
+      version: 0.*
+    - name: iot_usbh
+      override_path: ../iot_usbh
+      public: true
+      version: 0.*
+    source:
+      path: D:\project\datacollection\Espressif2\projects\dc01_simple\common_components\iot_usbh_cdc
+      type: local
+    targets:
+    - esp32s2
+    - esp32s3
+    version: 0.2.2
+  iot_usbh_modem:
+    dependencies:
+    - name: idf
+      version: '>=4.4.1'
+    - name: espressif/cmake_utilities
+      version: 0.*
+    - name: iot_usbh_cdc
+      override_path: ../iot_usbh_cdc
+      version: 0.*
+    source:
+      path: D:\project\datacollection\Espressif2\projects\dc01_simple\common_components\iot_usbh_modem
+      type: local
+    targets:
+    - esp32s2
+    - esp32s3
+    version: 0.2.1
+direct_dependencies:
+- camera
+- esp32-camera
+- espressif/json_parser
+- idf
+- iot_usbh_modem
+manifest_hash: cfbd2ef0bef1a0e6147a84d267a15824738380e7b793e93ebd61f41f17093abf
+target: esp32s3
+version: 2.0.0

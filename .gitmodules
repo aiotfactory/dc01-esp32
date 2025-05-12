@@ -1,0 +1,3 @@
+[submodule "private_components"]
+	path = private_components
+	url = https://gitee.com/aiotfactory/private-dc01-esp32.git
