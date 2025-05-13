@@ -39,13 +39,13 @@ I2C，I2S，UART，SPI，485，GPIO
 安装Python，从这里选择自己平台适合的git版本 https://www.python.org/ 为了方便，安装完毕要把python，pip加到执行环境变量中。
 
    
-### 使用镜像下载idf
+### 镜像下载idf
 
 以下要在git bash窗口执行，power shell或windows cmd不可以。
 git 支持使用类似如下命令将仓库的 URL 进行替换：
 
 ```
-:: 进入或创建一个安装目录（假设你的工作目录是 /d/project/datacollection/temp1）
+:: 进入或创建一个安装目录（假设你的工作目录是 D:\project\datacollection\temp1）
 cd /d/project/datacollection/temp1
 
 :: 从 Gitee 克隆 ESP-IDF 的镜像工具 esp-gitee-tools 到本地
@@ -71,15 +71,7 @@ cd esp-gitee-tools
 :: 此脚本会自动安装 ESP-IDF 所需的工具链、依赖库等
 ./install.sh /d/project/datacollection/temp1/esp-idf
 
-:: 安装完成后，你可能还需要执行 export.sh 来激活环境变量
-:: source /d/project/datacollection/temp1/esp-idf/export.sh
-
 ```
-
-当我们使用命令 `git clone https://github.com/espressif/esp-idf` 时，默认的 URL `https://github.com/espressif/esp-idf` 将被自动替换成 `https://jihulab.com/esp-mirror/espressif/esp-idf`。
-
-
-可以使用命令 `./jihu-mirror.sh set` 使用镜像的 URL。
 
 可以使用命令 `./jihu-mirror.sh unset` 恢复，不使用镜像的 URL。
 
@@ -88,14 +80,24 @@ cd esp-gitee-tools
 以下在windows命令窗口执行 (win+r,输入cmd.exe)
 
 ```
+:: 进入idf目录
 cd D:\project\datacollection\temp1\esp-idf
-```
 
-设置源
-
-```
+:: 设置本地源
 pip config set global.index-url http://mirrors.aliyun.com/pypi/simple
 pip config set global.trusted-host mirrors.aliyun.com
+
+:: 安装依赖
 install.bat
+
+:: 配置输出
 export.bat
+
+:: 修改idf，使spi默认为1
+编辑 D:\project\datacollection\temp1\esp-idf\components\hal\spi_hal.c，把0改为1，然后保存
+#if SPI_LL_MOSI_FREE_LEVEL 
+    // Change default data line level to low which same as esp32
+    spi_ll_set_mosi_free_level(hw, 1);  // 改为1，原始是0
+#endif
+
 ```
