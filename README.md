@@ -44,16 +44,34 @@ I2C，I2S，UART，SPI，485，GPIO
 以下要在git bash窗口执行，power shell或windows cmd不可以。
 git 支持使用类似如下命令将仓库的 URL 进行替换：
 
+:: 进入或创建一个安装目录（假设你的工作目录是 /d/project/datacollection/temp1）
+cd /d/project/datacollection/temp1
 
-cd /d/project/datacollection/temp1 建立一个安装目录后进入
-git clone https://gitee.com/EspressifSystems/esp-gitee-tools.git 下载gitee工具
-git config --global url.https://jihulab.com/esp-mirror/espressif/esp-idf.insteadOf https://github.com/espressif/esp-idf 配置镜像
-./esp-gitee-tools/jihu-mirror.sh set 设置镜像
-git clone -b v5.3.3 --recursive https://github.com/espressif/esp-idf.git 下载idf代码
+:: 从 Gitee 克隆 ESP-IDF 的镜像工具 esp-gitee-tools 到本地
+git clone https://gitee.com/EspressifSystems/esp-gitee-tools.git
+
+:: 设置 Git 镜像替换规则：
+:: 所有对 https://github.com/espressif/esp-idf 的请求
+:: 将被自动替换为 https://jihulab.com/esp-mirror/espressif/esp-idf
+:: 这样可以加快克隆速度（使用国内镜像）
+git config --global url.https://jihulab.com/esp-mirror/espressif/esp-idf.insteadOf https://github.com/espressif/esp-idf
+
+:: 运行 jihu-mirror.sh 脚本，正式启用镜像配置
+./esp-gitee-tools/jihu-mirror.sh set
+
+:: 使用镜像方式克隆 ESP-IDF 源码（会自动走上面配置的镜像），并进入 v5.3.3 分支
+:: --recursive 表示同时克隆所有子模块
+git clone -b v5.3.3 --recursive https://github.com/espressif/esp-idf.git
+
+:: 进入 esp-gitee-tools 目录，准备运行其提供的安装脚本
 cd esp-gitee-tools
+
+:: 执行 install.sh 脚本，并指定 ESP-IDF 的路径进行环境安装
+:: 此脚本会自动安装 ESP-IDF 所需的工具链、依赖库等
 ./install.sh /d/project/datacollection/temp1/esp-idf
 
-
+:: 安装完成后，你可能还需要执行 export.sh 来激活环境变量
+:: source /d/project/datacollection/temp1/esp-idf/export.sh
 
 当我们使用命令 `git clone https://github.com/espressif/esp-idf` 时，默认的 URL `https://github.com/espressif/esp-idf` 将被自动替换成 `https://jihulab.com/esp-mirror/espressif/esp-idf`。
 
@@ -66,14 +84,15 @@ cd esp-gitee-tools
 
 以下在windows命令窗口执行 (win+r,输入cmd.exe)
 
-
+```
 cd D:\project\datacollection\temp1\esp-idf
-
+```
 
 设置源
 
-
+```
 pip config set global.index-url http://mirrors.aliyun.com/pypi/simple
 pip config set global.trusted-host mirrors.aliyun.com
 install.bat
 export.bat
+```
