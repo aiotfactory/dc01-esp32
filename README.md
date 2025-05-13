@@ -1,141 +1,154 @@
-# 项目介绍
+# Project Introduction
 
-我司在嵌入式研发生产和IOT平台建设方面有20多年的经验，综合众多客户的需求，我们推出了此开源硬件设备。
-大多数时候客户开始一个项目都需要先行验证，为此我们将尽可能多的传感器，联网模块，供电方式等集中搭载在一个产品上，并提供在线编程和烧录等快捷方式，让客户可以迅速低成本验证自己的想法。
-当然，当客户真正需要量产设备时，需要对多余的器件进行裁剪，做到恰好满足自己要求，器件选择不多不少，做到成本极致，客户可以自行裁剪设计或者委托我司设计生产。
+Our company has over 20 years of experience in embedded product development, manufacturing, and IoT platform construction. Based on the needs of many customers, we have developed this open-hardware device.
 
-<img src="docs/pcb02.jpg" alt="PCB图片" width="300"/>
+In most cases, customers need to validate their project ideas before starting a full-scale implementation. To support rapid and low-cost validation, we have integrated as many sensors, connectivity modules, power options, and other components into one single product. We also provide convenient online programming and flashing methods so that customers can quickly verify their ideas at minimal cost.
 
-## 传感器
+Of course, when customers are ready for mass production, unnecessary components should be removed or optimized to precisely meet their specific requirements — not too many, not too few — achieving the lowest possible cost. Customers can either customize the design themselves or commission our team to handle the design and production.
 
-温度，湿度，气压，热成像，摄像头（广角，鱼眼，红外等多种镜头），PIR，超声波测距，光辐射强度
+<img src="docs/pcb02.jpg" alt="PCB Image" width="300"/>
 
-## 网络
+## Sensors
 
-WIFI，以太网，4G Cat1（全球制式和中国大陆制式），BLE，LORA点对点（专属PA放大，通讯10公里以上）
+Temperature, humidity, barometric pressure, thermal imaging, camera (with wide-angle, fisheye, infrared, and other lenses), PIR, ultrasonic distance measurement, light radiation intensity.
 
-## 接口
+## Connectivity
 
-I2C，I2S，UART，SPI，485，GPIO
+Wi-Fi, Ethernet, 4G Cat1 (global and China Mainland standards), BLE, LoRa point-to-point communication (with dedicated PA amplifier, up to 10 km range).
+
+## Interfaces
+
+I2C, I2S, UART, SPI, RS485, GPIO.
 
 ## ADC
 
-12bits和2路16bits
+1 x 12-bit and 2 x 16-bit ADC channels.
 
-## 运动部件
+## Moving Parts
 
-2自由度云台
+2-axis gimbal.
 
-## 供电
+## Power Options
 
-适配器供电，可充电电池供电，一次性电池供电，适配器+电池双供电
+AC adapter, rechargeable battery, disposable battery, dual power supply (adapter + battery).
 
+---
 
-## 安装步骤
+## Installation Steps
 
-### 准备工具
+### Preparation Tools
 
-安装Git，从这里选择自己平台适合的git版本 https://git-scm.com/downloads 为了方便，安装完毕要把git加到执行环境变量中。
-安装Python，从这里选择自己平台适合的git版本 https://www.python.org/ 为了方便，安装完毕要把python，pip加到执行环境变量中。
+Install Git from: https://git-scm.com/downloads (choose the version suitable for your OS).  
+For convenience, add Git to the system PATH environment variable after installation.
 
-   
-### 下载idf
+Install Python from: https://www.python.org/ (choose the version suitable for your OS).  
+For convenience, add both `python` and `pip` to the system PATH environment variable after installation.
 
-以下要在git bash窗口执行，power shell或windows cmd不可以。
-git 支持使用类似如下命令将仓库的 URL 进行替换：
+---
+
+### Download ESP-IDF
+
+The following commands must be executed in **Git Bash**. PowerShell or Windows CMD is **not supported**.
+
+Git supports replacing repository URLs using commands similar to the ones below:
 
 ```
-:: 进入或创建一个安装目录（假设你的工作目录是 D:\project\datacollection\temp1）
+:: Enter or create an installation directory (assuming your working directory is D:\project\datacollection\temp1)
 cd /d/project/datacollection/temp1
 
-:: 从 Gitee 克隆 ESP-IDF 的镜像工具 esp-gitee-tools 到本地
+:: Clone the esp-gitee-tools mirror utility from Gitee
 git clone https://gitee.com/EspressifSystems/esp-gitee-tools.git
 
-:: 设置 Git 镜像替换规则：
-:: 所有对 https://github.com/espressif/esp-idf 的请求
-:: 将被自动替换为 https://jihulab.com/esp-mirror/espressif/esp-idf
-:: 这样可以加快克隆速度（使用国内镜像）
+:: Set up Git mirror replacement rule:
+:: All requests to https://github.com/espressif/esp-idf
+:: will be automatically replaced with https://jihulab.com/esp-mirror/espressif/esp-idf
+:: This helps speed up cloning by using a domestic mirror
 git config --global url.https://jihulab.com/esp-mirror/espressif/esp-idf.insteadOf https://github.com/espressif/esp-idf
 
-:: 运行 jihu-mirror.sh 脚本，正式启用镜像配置
+:: Run the jihu-mirror.sh script to activate the mirror configuration
 ./esp-gitee-tools/jihu-mirror.sh set
 
-:: 使用镜像方式克隆 ESP-IDF 源码（会自动走上面配置的镜像），并进入 v5.3.2 分支
-:: --recursive 表示同时克隆所有子模块
+:: Clone ESP-IDF source code using the mirror (automatically uses the configured mirror)
+:: Switch to branch v5.3.2
+:: --recursive means all submodules will also be cloned
 git clone -b v5.3.2 --recursive https://github.com/espressif/esp-idf.git
 
-:: 进入 esp-gitee-tools 目录，准备运行其提供的安装脚本
+:: Go to the esp-gitee-tools directory to prepare for running the installation script
 cd esp-gitee-tools
 
-:: 执行 install.sh 脚本，并指定 ESP-IDF 的路径进行环境安装
-:: 此脚本会自动安装 ESP-IDF 所需的工具链、依赖库等
+:: Run install.sh and specify the ESP-IDF path to install the required environment
+:: This script installs the toolchain and dependencies needed for ESP-IDF
 ./install.sh /d/project/datacollection/temp1/esp-idf
-
 ```
 
-可以使用命令 `./jihu-mirror.sh unset` 恢复，不使用镜像的 URL。
+You can use the command `./jihu-mirror.sh unset` to revert and stop using the mirror URL.
 
-### 配置idf
+---
 
-以下在windows命令窗口执行 (win+r,输入cmd.exe)
+### Configure ESP-IDF
+
+Execute the following in a **Windows Command Prompt** (Win+R, type `cmd.exe`):
 
 ```
-:: 进入idf目录
+:: Navigate to the IDF directory
 cd D:\project\datacollection\temp1\esp-idf
 
-:: 设置本地源
+:: Set local pip source
 pip config set global.index-url http://mirrors.aliyun.com/pypi/simple
 pip config set global.trusted-host mirrors.aliyun.com
 
-:: 安装依赖
+:: Install dependencies
 install.bat
 
-:: 配置输出
+:: Export environment variables
 export.bat
 
-:: 修改idf，使spi默认为1
-编辑 D:\project\datacollection\temp1\esp-idf\components\hal\spi_hal.c，把0改为1，然后保存
+:: Modify IDF so that SPI default level is 1
+Edit D:\project\datacollection\temp1\esp-idf\components\hal\spi_hal.c, change 0 to 1, then save.
 #if SPI_LL_MOSI_FREE_LEVEL 
     // Change default data line level to low which same as esp32
-    spi_ll_set_mosi_free_level(hw, 1);  // 改为1，原始是0
+    spi_ll_set_mosi_free_level(hw, 1);  // changed to 1, originally 0
 #endif
-
 ```
 
-### 编译项目
+---
 
-以下在windows命令窗口执行 (win+r,输入cmd.exe)
+### Build the Project
+
+Execute the following in a **Windows Command Prompt** (Win+R, type `cmd.exe`):
 
 ```
-:: 进入目录
+:: Navigate to the working directory
 cd D:\project\datacollection\temp1
 
-:: 执行idf的export
+:: Run export.bat from IDF
 .\esp-idf\export.bat
 
-:: 下载项目文件
+:: Clone the project files
 git clone https://gitee.com/aiotfactory/dc01-esp32.git
 
-:: 编译
+:: Build the project
 cd dc01-esp32
 idf.py build
-
 ```
 
-### 烧录
+---
 
-编译好后先不要退出，如果已经退出，重新执行export.bat后再进入到项目目录（dc01-esp32）下。
+### Flashing
 
-将烧录器插在电脑的USB口，首次会自动安装驱动，安装好后，通过下图查看是否安装成功，以及记录COM端口号，每次重新插上可能COM口号会改变，因此需要每次确认。
+Do not exit the terminal after building. If you have exited, re-run `export.bat` and navigate back to the project directory (`dc01-esp32`) before proceeding.
 
-<img src="docs/burn01.jpg" alt="烧录适配器" width="300"/>
+Plug the programmer into your computer's USB port. On first use, the driver will install automatically. After installation, check the Device Manager to confirm successful installation and note the COM port number. The COM port may change each time the device is reconnected, so always double-check it.
 
-如下图，红色圆标记2是烧录模式切换按钮，上电烧录前要按住。1是供电口，3是烧录接线处，注意接线顺序，如果比较松动，按压住再开始烧录，4和电脑连接。
+<img src="docs/burn01.jpg" alt="Flashing Adapter" width="300"/>
 
-<img src="docs/pcb01.jpg" alt="PCB烧录" width="400"/>
+In the image below, the red circle labeled "2" is the flashing mode toggle button. Press and hold it before powering on the device. Label "1" is the power port, "3" is where the wiring connects, make sure the wiring order is correct. If loose, press firmly while starting the flashing process. Label "4" connects to the PC.
+
+<img src="docs/pcb01.jpg" alt="PCB Flashing" width="400"/>
 
 ```
-先按住烧录按钮，之后上电，然后在项目根目录下执行，如果不成功可以多尝试几次。
-idf.py -p COM42 flash monitor 
-
+:: First, press and hold the flash button, then power on the device.
+:: Then execute the following command in the project root directory.
+:: If failed, try several times.
+idf.py -p COM42 flash monitor
 ```
