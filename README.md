@@ -60,9 +60,9 @@ git config --global url.https://jihulab.com/esp-mirror/espressif/esp-idf.instead
 :: 运行 jihu-mirror.sh 脚本，正式启用镜像配置
 ./esp-gitee-tools/jihu-mirror.sh set
 
-:: 使用镜像方式克隆 ESP-IDF 源码（会自动走上面配置的镜像），并进入 v5.3.3 分支
+:: 使用镜像方式克隆 ESP-IDF 源码（会自动走上面配置的镜像），并进入 v5.3.2 分支
 :: --recursive 表示同时克隆所有子模块
-git clone -b v5.3.3 --recursive https://github.com/espressif/esp-idf.git
+git clone -b v5.3.2 --recursive https://github.com/espressif/esp-idf.git
 
 :: 进入 esp-gitee-tools 目录，准备运行其提供的安装脚本
 cd esp-gitee-tools
@@ -99,5 +99,25 @@ export.bat
     // Change default data line level to low which same as esp32
     spi_ll_set_mosi_free_level(hw, 1);  // 改为1，原始是0
 #endif
+
+```
+
+### 编译项目
+
+以下在windows命令窗口执行 (win+r,输入cmd.exe)
+
+```
+:: 进入目录
+cd D:\project\datacollection\temp1
+
+:: 执行idf的export
+.\esp-idf\export.bat
+
+:: 下载项目文件
+git clone https://gitee.com/aiotfactory/dc01-esp32.git
+
+:: 编译
+cd dc01-esp32
+idf.py build
 
 ```

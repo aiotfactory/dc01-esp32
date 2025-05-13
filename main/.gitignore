@@ -1,1 +1,3 @@
 build/
+idf_component.yml
+CMakeLists.txt
