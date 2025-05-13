@@ -33,7 +33,21 @@ I2C，I2S，UART，SPI，485，GPIO
 
 ### 步骤
 
-1. **克隆仓库**
-   ```bash
-   git clone https://github.com/yourusername/yourproject.git
-   cd yourproject
+1. **安装git**
+
+   从这里选择自己平台适合的git版本 https://git-scm.com/downloads
+   
+2. **使用镜像**
+
+git 支持使用类似如下命令将仓库的 URL 进行替换：
+
+```
+git config --global url.https://jihulab.com/esp-mirror/espressif/esp-idf.insteadOf https://github.com/espressif/esp-idf
+```
+
+当我们使用命令 `git clone https://github.com/espressif/esp-idf` 时，默认的 URL `https://github.com/espressif/esp-idf` 将被自动替换成 `https://jihulab.com/esp-mirror/espressif/esp-idf`。
+
+
+可以使用命令 `./jihu-mirror.sh set` 使用镜像的 URL。
+
+可以使用命令 `./jihu-mirror.sh unset` 恢复，不使用镜像的 URL。
