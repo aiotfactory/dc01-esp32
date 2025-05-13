@@ -39,7 +39,7 @@ I2C，I2S，UART，SPI，485，GPIO
 安装Python，从这里选择自己平台适合的git版本 https://www.python.org/ 为了方便，安装完毕要把python，pip加到执行环境变量中。
 
    
-### 镜像下载idf
+### 下载idf
 
 以下要在git bash窗口执行，power shell或windows cmd不可以。
 git 支持使用类似如下命令将仓库的 URL 进行替换：
@@ -119,5 +119,21 @@ git clone https://gitee.com/aiotfactory/dc01-esp32.git
 :: 编译
 cd dc01-esp32
 idf.py build
+
+```
+
+### 烧录
+
+编译好后先不要退出，如果已经退出，重新执行export.bat后再进入到项目目录（dc01-esp32）下。
+
+将烧录器插在电脑的USB口，首次会自动安装驱动，安装好后，通过下图查看是否安装成功，以及记录COM端口号，每次重新插上可能COM口号会改变，因此需要每次确认。
+<img src="docs/burn01.jpg" alt="烧录适配器" width="300"/>
+
+如下图，红色圆标记2是烧录模式切换按钮，上电烧录前要按住。1是供电口，3是烧录接线处，注意接线顺序，如果比较松动，按压住再开始烧录，4和电脑连接。
+<img src="docs/pcb02.jpg" alt="PCB烧录" width="400"/>
+
+```
+先按住烧录按钮，之后上电，然后在项目根目录下执行，如果不成功可以多尝试几次。
+idf.py -p COM42 flash monitor
 
 ```
