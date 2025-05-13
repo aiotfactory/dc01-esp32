@@ -67,41 +67,17 @@ Please install the following tools:
 
 ### Download ESP-IDF
 
-> **Note:** The following steps must be executed in **Git Bash**, as PowerShell or Windows CMD does not support some of the commands.
-
-Git supports replacing repository URLs using mirror configurations to speed up cloning from domestic mirrors. Here's how to set it up:
+> **Note:** The following steps must be executed in a **Windows Command Prompt** (Win+R → type `cmd.exe`)
 
 ```bash
 # Enter or create an installation directory (example path: D:\project\datacollection\temp1)
-cd /d/project/datacollection/temp1
-
-# Clone esp-gitee-tools (a mirror utility for ESP-IDF) from Gitee
-git clone https://gitee.com/EspressifSystems/esp-gitee-tools.git
-
-# Set up Git mirror replacement rule:
-# All requests to GitHub’s esp-idf will be automatically redirected to Jihulab's mirror
-git config --global url.https://jihulab.com/esp-mirror/espressif/esp-idf.insteadOf https://github.com/espressif/esp-idf
-
-# Enable mirror configuration
-./esp-gitee-tools/jihu-mirror.sh set
+cd D:\project\datacollection\temp1
 
 # Clone ESP-IDF source code using the mirror and switch to v5.3.2 branch
 # --recursive means all submodules will also be cloned
 git clone -b v5.3.2 --recursive https://github.com/espressif/esp-idf.git
 
-# Enter esp-gitee-tools directory to prepare for running the installation script
-cd esp-gitee-tools
-
-# Run install.sh script and specify the ESP-IDF installation path
-./install.sh /d/project/datacollection/temp1/esp-idf
 ```
-
-To revert back to using the official URL:
-
-```bash
-./jihu-mirror.sh unset
-```
-
 ---
 
 ### Configure ESP-IDF
@@ -112,11 +88,7 @@ To revert back to using the official URL:
 # Navigate to IDF directory
 cd D:\project\datacollection\temp1\esp-idf
 
-# Set pip to use a domestic mirror (Aliyun)
-pip config set global.index-url http://mirrors.aliyun.com/pypi/simple
-pip config set global.trusted-host mirrors.aliyun.com
-
-# Install dependencies
+# Run install.bat script
 install.bat
 
 # Export environment variables
