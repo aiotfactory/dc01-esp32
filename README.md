@@ -1,113 +1,135 @@
+[中文](./README_CN.md)
+
 # Project Introduction
 
-Our company has over 20 years of experience in embedded product development, manufacturing, and IoT platform construction. Based on the needs of many customers, we have developed this open-hardware device.
+Our company has over 20 years of experience in embedded R&D, production, and IoT platform development. Based on extensive customer feedback, we have developed this open-hardware device.
 
-In most cases, customers need to validate their project ideas before starting a full-scale implementation. To support rapid and low-cost validation, we have integrated as many sensors, connectivity modules, power options, and other components into one single product. We also provide convenient online programming and flashing methods so that customers can quickly verify their ideas at minimal cost.
+Most customers need to perform rapid validation before starting a new project. To support this, we have integrated as many core components as possible — including various sensors, connectivity modules, and power options — into a single product. We also provide online programming and flashing capabilities to help customers validate their ideas quickly and at minimal cost.
 
-Of course, when customers are ready for mass production, unnecessary components should be removed or optimized to precisely meet their specific requirements — not too many, not too few — achieving the lowest possible cost. Customers can either customize the design themselves or commission our team to handle the design and production.
+When customers are ready for mass production, redundant components can be trimmed based on actual needs — ensuring the design includes just enough components to meet functional requirements while minimizing costs. Customers can either optimize the design themselves or commission us to assist with customized development and manufacturing.
 
 <img src="docs/pcb02.jpg" alt="PCB Image" width="300"/>
 
 ## Sensors
 
-Temperature, humidity, barometric pressure, thermal imaging, camera (with wide-angle, fisheye, infrared, and other lenses), PIR, ultrasonic distance measurement, light radiation intensity.
+- Temperature, humidity, barometric pressure  
+- Thermal imaging  
+- Camera (supports wide-angle, fisheye, infrared, and other lenses)  
+- PIR (Passive Infrared) sensor  
+- Ultrasonic distance measurement  
+- Light radiation intensity detection  
 
 ## Connectivity
 
-Wi-Fi, Ethernet, 4G Cat1 (global and China Mainland standards), BLE, LoRa point-to-point communication (with dedicated PA amplifier, up to 10 km range).
+- Wi-Fi  
+- Ethernet  
+- 4G Cat1 (supports both global and China Mainland standards)  
+- BLE (Bluetooth Low Energy)  
+- LoRa point-to-point communication (with dedicated PA amplifier, communication range up to 10 km or more)  
 
 ## Interfaces
 
-I2C, I2S, UART, SPI, RS485, GPIO.
+- I²C, I²S, UART, SPI, RS485, GPIO  
 
 ## ADC
 
-1 x 12-bit and 2 x 16-bit ADC channels.
+- Multi 12-bit ADC  
+- 2 x 16-bit ADC  
 
 ## Moving Parts
 
-2-axis gimbal.
+- 2-axis gimbal  
 
 ## Power Options
 
-AC adapter, rechargeable battery, disposable battery, dual power supply (adapter + battery).
+- Adapter-powered  
+- Rechargeable battery-powered  
+- Disposable battery-powered  
+- Dual power supply: adapter + battery  
 
 ---
 
-## Installation Steps
+## Installation Guide
 
-### Preparation Tools
+> **Tip:** The platform provides an online compilation and flashing feature, which is very convenient. New users are recommended to try the online method first. If you choose the online method, you do not need to read the following local setup instructions.
 
-Install Git from: https://git-scm.com/downloads (choose the version suitable for your OS).  
-For convenience, add Git to the system PATH environment variable after installation.
+### Required Tools
 
-Install Python from: https://www.python.org/ (choose the version suitable for your OS).  
-For convenience, add both `python` and `pip` to the system PATH environment variable after installation.
+Please install the following tools:
+
+- Git: [Download here](https://git-scm.com/downloads)  
+  After installation, add `git` to your system PATH environment variable for global access.
+  
+- Python: [Download here](https://www.python.org/)  
+  After installation, add both `python` and `pip` to your system PATH environment variable.
 
 ---
 
 ### Download ESP-IDF
 
-The following commands must be executed in **Git Bash**. PowerShell or Windows CMD is **not supported**.
+> **Note:** The following steps must be executed in **Git Bash**, as PowerShell or Windows CMD does not support some of the commands.
 
-Git supports replacing repository URLs using commands similar to the ones below:
+Git supports replacing repository URLs using mirror configurations to speed up cloning from domestic mirrors. Here's how to set it up:
 
-```
-:: Enter or create an installation directory (assuming your working directory is D:\project\datacollection\temp1)
+```bash
+# Enter or create an installation directory (example path: D:\project\datacollection\temp1)
 cd /d/project/datacollection/temp1
 
-:: Clone the esp-gitee-tools mirror utility from Gitee
+# Clone esp-gitee-tools (a mirror utility for ESP-IDF) from Gitee
 git clone https://gitee.com/EspressifSystems/esp-gitee-tools.git
 
-:: Set up Git mirror replacement rule:
-:: All requests to https://github.com/espressif/esp-idf
-:: will be automatically replaced with https://jihulab.com/esp-mirror/espressif/esp-idf
-:: This helps speed up cloning by using a domestic mirror
+# Set up Git mirror replacement rule:
+# All requests to GitHub’s esp-idf will be automatically redirected to Jihulab's mirror
 git config --global url.https://jihulab.com/esp-mirror/espressif/esp-idf.insteadOf https://github.com/espressif/esp-idf
 
-:: Run the jihu-mirror.sh script to activate the mirror configuration
+# Enable mirror configuration
 ./esp-gitee-tools/jihu-mirror.sh set
 
-:: Clone ESP-IDF source code using the mirror (automatically uses the configured mirror)
-:: Switch to branch v5.3.2
-:: --recursive means all submodules will also be cloned
+# Clone ESP-IDF source code using the mirror and switch to v5.3.2 branch
+# --recursive means all submodules will also be cloned
 git clone -b v5.3.2 --recursive https://github.com/espressif/esp-idf.git
 
-:: Go to the esp-gitee-tools directory to prepare for running the installation script
+# Enter esp-gitee-tools directory to prepare for running the installation script
 cd esp-gitee-tools
 
-:: Run install.sh and specify the ESP-IDF path to install the required environment
-:: This script installs the toolchain and dependencies needed for ESP-IDF
+# Run install.sh script and specify the ESP-IDF installation path
 ./install.sh /d/project/datacollection/temp1/esp-idf
 ```
 
-You can use the command `./jihu-mirror.sh unset` to revert and stop using the mirror URL.
+To revert back to using the official URL:
+
+```bash
+./jihu-mirror.sh unset
+```
 
 ---
 
 ### Configure ESP-IDF
 
-Execute the following in a **Windows Command Prompt** (Win+R, type `cmd.exe`):
+> **Note:** The following steps must be executed in a **Windows Command Prompt** (Win+R → type `cmd.exe`)
 
-```
-:: Navigate to the IDF directory
+```bash
+# Navigate to IDF directory
 cd D:\project\datacollection\temp1\esp-idf
 
-:: Set local pip source
+# Set pip to use a domestic mirror (Aliyun)
 pip config set global.index-url http://mirrors.aliyun.com/pypi/simple
 pip config set global.trusted-host mirrors.aliyun.com
 
-:: Install dependencies
+# Install dependencies
 install.bat
 
-:: Export environment variables
+# Export environment variables
 export.bat
 
-:: Modify IDF so that SPI default level is 1
-Edit D:\project\datacollection\temp1\esp-idf\components\hal\spi_hal.c, change 0 to 1, then save.
+# Modify SPI default level setting
+# Edit the following file and change 0 to 1, then save:
+# File path:
+# D:\project\datacollection\temp1\esp-idf\components\hal\spi_hal.c
+
 #if SPI_LL_MOSI_FREE_LEVEL 
     // Change default data line level to low which same as esp32
-    spi_ll_set_mosi_free_level(hw, 1);  // changed to 1, originally 0
+    spi_ll_set_mosi_free_level(hw, 1);  // changed to 1, original was 0
 #endif
 ```
 
@@ -115,40 +137,39 @@ Edit D:\project\datacollection\temp1\esp-idf\components\hal\spi_hal.c, change 0 
 
 ### Build the Project
 
-Execute the following in a **Windows Command Prompt** (Win+R, type `cmd.exe`):
+> **Note:** The following steps must be executed in a **Windows Command Prompt** (Win+R → type `cmd.exe`)
 
-```
-:: Navigate to the working directory
+```bash
+# Navigate to working directory
 cd D:\project\datacollection\temp1
 
-:: Run export.bat from IDF
+# Run export.bat to set environment variables
 .\esp-idf\export.bat
 
-:: Clone the project files
+# Clone the project code
 git clone https://gitee.com/aiotfactory/dc01-esp32.git
 
-:: Build the project
+# Enter project directory and build
 cd dc01-esp32
 idf.py build
 ```
 
 ---
 
-### Flashing
+### Flashing the Firmware
 
-Do not exit the terminal after building. If you have exited, re-run `export.bat` and navigate back to the project directory (`dc01-esp32`) before proceeding.
+Do not close the terminal after building. If you have exited, re-run `export.bat` and navigate back to the `dc01-esp32` directory before continuing.
 
-Plug the programmer into your computer's USB port. On first use, the driver will install automatically. After installation, check the Device Manager to confirm successful installation and note the COM port number. The COM port may change each time the device is reconnected, so always double-check it.
+Plug the programmer into your computer's USB port. On first connection, the driver will install automatically. Once installed, check Device Manager to confirm successful recognition and note the current COM port number (it may change each time you reconnect, so always double-check).
 
 <img src="docs/burn01.jpg" alt="Flashing Adapter" width="300"/>
 
-In the image below, the red circle labeled "2" is the flashing mode toggle button. Press and hold it before powering on the device. Label "1" is the power port, "3" is where the wiring connects, make sure the wiring order is correct. If loose, press firmly while starting the flashing process. Label "4" connects to the PC.
+As shown in the image below, the red-marked button labeled **2** is the flashing mode toggle. Press and hold it before powering on the device. Label **1** is the power interface, **3** is the wiring connection point — ensure correct wiring order. If loose, press firmly before starting flashing. Label **4** connects to the PC.
 
 <img src="docs/pcb01.jpg" alt="PCB Flashing" width="400"/>
 
-```
-:: First, press and hold the flash button, then power on the device.
-:: Then execute the following command in the project root directory.
-:: If failed, try several times.
+```bash
+# Operation flow: Press flash button → power on → run the command below
+# If failed, try several times
 idf.py -p COM42 flash monitor
 ```
