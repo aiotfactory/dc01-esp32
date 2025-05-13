@@ -134,6 +134,6 @@ idf.py build
 
 ```
 先按住烧录按钮，之后上电，然后在项目根目录下执行，如果不成功可以多尝试几次。
-idf.py -p COM42 flash monitor
+idf.py -p COM42 flash monitor 
 
 ```
