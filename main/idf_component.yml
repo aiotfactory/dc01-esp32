@@ -1,0 +1,19 @@
+dependencies:
+  idf: ">=4.4.1"
+  json_parser:
+    version: "1.0.3"
+  iot_usbh_modem:
+    version: ">=0.2.0"
+    override_path: "../common_components/iot_usbh_modem"
+  camera:
+    version: "*"
+    override_path: "../common_components/camera"
+  esp32-camera:
+    version: ">=2.0.3"
+    override_path: "../common_components/esp32-camera"
+    
+  #for lib compile
+  #comm_core:
+  #  version: "*"
+  #  override_path: "../private_components/comm_core"
+    
