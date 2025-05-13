@@ -31,13 +31,13 @@ I2C，I2S，UART，SPI，485，GPIO
 适配器供电，可充电电池供电，一次性电池供电，适配器+电池双供电
 
 
-### 步骤
+## 安装步骤
 
-1. **安装git**
+### 安装git
 
-   从这里选择自己平台适合的git版本 https://git-scm.com/downloads
+从这里选择自己平台适合的git版本 https://git-scm.com/downloads
    
-2. **使用镜像**
+### 使用镜像
 
 git 支持使用类似如下命令将仓库的 URL 进行替换：
 
