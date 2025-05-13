@@ -44,6 +44,7 @@ I2C，I2S，UART，SPI，485，GPIO
 以下要在git bash窗口执行，power shell或windows cmd不可以。
 git 支持使用类似如下命令将仓库的 URL 进行替换：
 
+```
 :: 进入或创建一个安装目录（假设你的工作目录是 /d/project/datacollection/temp1）
 cd /d/project/datacollection/temp1
 
@@ -72,6 +73,8 @@ cd esp-gitee-tools
 
 :: 安装完成后，你可能还需要执行 export.sh 来激活环境变量
 :: source /d/project/datacollection/temp1/esp-idf/export.sh
+
+```
 
 当我们使用命令 `git clone https://github.com/espressif/esp-idf` 时，默认的 URL `https://github.com/espressif/esp-idf` 将被自动替换成 `https://jihulab.com/esp-mirror/espressif/esp-idf`。
 
