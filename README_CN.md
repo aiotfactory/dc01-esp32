@@ -1,5 +1,9 @@
 [English](./README.md)
 
+# 咨询
+
+  www.zhiyince.com  market@zhiyince.com  V：laofuaifaming
+  
 # 项目介绍
 
 我司在嵌入式研发生产与 IoT 平台建设方面拥有超过 20 年的经验。基于众多客户的需求反馈，我们推出了这款开源硬件设备。

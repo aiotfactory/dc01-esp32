@@ -1,5 +1,9 @@
 [中文](./README_CN.md)
 
+# Consult
+
+  www.zhiyince.com  market@zhiyince.com  WeChat：laofuaifaming
+  
 # Project Introduction
 
 Our company has over 20 years of experience in embedded R&D, production, and IoT platform development. Based on extensive customer feedback, we have developed this open-hardware device.
