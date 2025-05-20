@@ -556,7 +556,24 @@ typedef enum {
      * 云端使用，附带一些额外数据用。
      * Used by the cloud to carry some additional data.
      */
-    COMMAND_FLAG_RAW_DATA = (0x01 << 5)
+    COMMAND_FLAG_RAW_DATA = (0x01 << 5),
+    
+	/**
+     * 表示使用了哪个网络接口发送的数据。
+	 * 网络类型映射如下：
+	 * - 4G: 00
+	 * - Wi-Fi: 01
+	 * - 以太网: 10
+	 *
+	 * Indicates which network interface was used to send the data.
+	 * Network type mapping:
+	 * - 4G: 00
+	 * - Wi-Fi: 01
+	 * - Ethernet: 10
+	 */
+    COMMAND_FLAG_NET_BIT0 = (0x01 << 6),
+    COMMAND_FLAG_NET_BIT1 = (0x01 << 7)
+    
 } command_flag;
 
 /**

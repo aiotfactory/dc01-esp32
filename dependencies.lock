@@ -5,6 +5,12 @@ dependencies:
       path: D:\project\datacollection\Espressif2\projects\dc01_simple\common_components\camera
       type: local
     version: '*'
+  comm_core:
+    dependencies: []
+    source:
+      path: D:\project\datacollection\Espressif2\projects\dc01_simple\private_components\comm_core
+      type: local
+    version: '*'
   esp32-camera:
     dependencies: []
     source:
@@ -96,10 +102,11 @@ dependencies:
     version: 0.2.1
 direct_dependencies:
 - camera
+- comm_core
 - esp32-camera
 - espressif/json_parser
 - idf
 - iot_usbh_modem
-manifest_hash: cfbd2ef0bef1a0e6147a84d267a15824738380e7b793e93ebd61f41f17093abf
+manifest_hash: a5144cd4e1ed2d951e3bd8cb561985df6bc238e4865267ed65f0e58ca637b876
 target: esp32s3
 version: 2.0.0

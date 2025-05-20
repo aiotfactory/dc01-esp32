@@ -106,29 +106,30 @@ void ultrasonic_queue(void)
 			}
 		}
 		distance=((distance*temp_value)/2)/1000;
-		if(distance>30000 || distance<1)
-			distance=1;
-		if(xSemaphoreTake(ultrasonic_semaphore_handle,portMAX_DELAY)==pdTRUE)
-		{
-			cache[cache_idx%ULTRASONIC_CACHE_NUM]=distance;
- 			cache_idx++;
- 			if(cache_max==0 || cache_max<distance) cache_max=distance;
- 			if(cache_min==0 || distance<cache_min) cache_min=distance;
-
- 			total_times++;
- 			xSemaphoreGive(ultrasonic_semaphore_handle);
- 			
- 		}
- 		
- 		if(config_trigger_max>0 && config_trigger_max>config_trigger_min && distance>=config_trigger_min && distance<=config_trigger_max)
- 		{
-			temp_trigger_times++;
-			if(temp_trigger_times>=config_trigger_times){
+		if(distance<30000 && distance > 1)
+		{	
+			if(xSemaphoreTake(ultrasonic_semaphore_handle,portMAX_DELAY)==pdTRUE)
+			{
+				cache[cache_idx%ULTRASONIC_CACHE_NUM]=distance;
+	 			cache_idx++;
+	 			if(cache_max==0 || cache_max<distance) cache_max=distance;
+	 			if(cache_min==0 || distance<cache_min) cache_min=distance;
+	
+	 			total_times++;
+	 			xSemaphoreGive(ultrasonic_semaphore_handle);
+	 			
+	 		}
+	 		
+	 		if(config_trigger_max>0 && config_trigger_max>config_trigger_min && distance>=config_trigger_min && distance<=config_trigger_max)
+	 		{
+				temp_trigger_times++;
+				if(temp_trigger_times>=config_trigger_times){
+					temp_trigger_times=0;
+					ultrasonic_upload((void *)2);
+				}
+			}else 
 				temp_trigger_times=0;
-				ultrasonic_upload((void *)2);
-			}
-		}else 
-			temp_trigger_times=0;
+		}
 	}
 }
 static void pin_trig(uint8_t onoff)

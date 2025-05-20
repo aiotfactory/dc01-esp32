@@ -66,7 +66,8 @@ static void set_random_addr(void) {
 	addr.val[2]=rt_device_mac[3];
 	addr.val[3]=rt_device_mac[2];
 	addr.val[4]=rt_device_mac[1];
-	addr.val[5]=rt_device_mac[0];
+	addr.val[5]=rt_device_mac[0] & 0x0f;
+	
     /* Set address */
     rc = ble_hs_id_set_rnd(addr.val);
     assert(rc == 0);

@@ -108,7 +108,7 @@ static int adc_read_value_excute(uint8_t avin)
 	}
 	tm7705_off();
 ERROR_PROCESS:
-	return -100;//0
+	return -999999999;//0
 }
 //测试通讯
 static esp_err_t adc_init(void)
@@ -168,7 +168,7 @@ esp_err_t adc_read_value(int *ml01,int *ml02)
 	if((*ml02)>0)
 		*ml02=adc_read_value_excute(2);
 	//ESP_LOGI(TAG, "tm7705 pin1 %u,pin2 %u",*ml01,*ml02);
-	if((*ml01==-100)||(*ml02==-100)){
+	if((*ml01==-999999999)||(*ml02==-999999999)){
 		read_failed_times++;
 		return ESP_FAIL;
 	}
