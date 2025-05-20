@@ -104,7 +104,6 @@ static uint8_t aht20_read_exe(uint8_t *flag, uint8_t *status, int *humidity,
   variable_set(&temperature_aht20,temperature, sizeof(int));
   variable_set(&humidity_aht20,humidity, sizeof(int));
  
-  i2c_deinit();
 ERROR_PROCESS:
   COPY_TO_BUF_NO_CHECK(times_total, property, idex)
   COPY_TO_BUF_NO_CHECK(times_success, property, idex)

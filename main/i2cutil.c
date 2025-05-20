@@ -49,6 +49,7 @@ void i2c_deinit(void)
 	//ESP_LOGI(TAG, "i2c deinit");
 	init=0;
 	i2c_driver_delete(I2C_NUM_0);
+	ESP_LOGI(TAG, "x6");
 	tm7705_off();//share the same power;
 	power_onoff_i2c(0);
 	util_delay_ms(3000);

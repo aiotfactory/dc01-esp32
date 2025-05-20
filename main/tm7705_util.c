@@ -106,6 +106,7 @@ static int adc_read_value_excute(uint8_t avin)
 	if(isvalid){
 		return (int)(ddata2*10000000);//10 uv
 	}
+
 	tm7705_off();
 ERROR_PROCESS:
 	return -999999999;//0
@@ -145,9 +146,9 @@ static esp_err_t adc_init(void)
           //00001100
 		  spiutil_tm7705_write(SPI_TM7705,0x21, reg_freq_value);//0 010 0 0 01 ain2频率寄存器写入  000 0 0 100(0x04) 50hz
 		  spiutil_tm7705_read(SPI_TM7705,0x29,(uint8_t *)&data,1); //0 010 1 0 01 ain2频率寄存器读取
-		  if(data!=reg_freq_value)
+		  if(data!=reg_freq_value){
 			 goto fail_process;
-		  //ESP_LOGI(TAG, "tm7705 inited success");
+		  }
 		  adc_inited=1;
 		  return ESP_OK;
 	  }

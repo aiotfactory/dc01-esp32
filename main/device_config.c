@@ -11,7 +11,7 @@ void define_user_config(void)
 	
     define_number_variable(MODULE_META,CONFIG_META_ONOFF,"meta_onoff",1,sizeof(uint8_t),0,CONFIG_NUMBER_ENUM,2,0,1);
     define_number_variable(MODULE_META,CONFIG_META_UPLOAD_INTERVAL_SECONDS,"meta_upload_interval_seconds",10,sizeof(uint32_t),0,CONFIG_NUMBER_NORMAL,2,0,0xffffffff);    
-   	define_number_variable(MODULE_ADC_BAT,CONFIG_ADC_BAT_ONOFF,"adc_bat_onoff",1,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,2,0,1);
+   	define_number_variable(MODULE_ADC_BAT,CONFIG_ADC_BAT_ONOFF,"adc_bat_onoff",0,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,2,0,1);
    	define_number_variable(MODULE_ADC_BAT,CONFIG_ADC_BAT_PARTIAL_PRESSURE,"adc_bat_partial_pressure",5000,sizeof(uint32_t),0,CONFIG_NUMBER_NORMAL,2,1,0xffffffff); 
     define_number_variable(MODULE_ADC_BAT,CONFIG_ADC_BAT_UPLOAD_INTERVAL_SECONDS,"adc_bat_upload_interval_seconds",10,sizeof(uint32_t),0,CONFIG_NUMBER_NORMAL,2,0,0xffffffff);  
     define_number_variable(MODULE_LORA,CONFIG_LORA_MODE,"lora_mode",0,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,2,0,1);//0 off,1 rx
@@ -74,7 +74,7 @@ void define_user_config(void)
 	define_number_variable(MODULE_GPIO,CONFIG_GPIO_EXT_IO1 ,"config_gpio_ext_io1",0,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,2,1,2); 
 	define_number_variable(MODULE_GPIO,CONFIG_GPIO_EXT_IO2 ,"config_gpio_ext_io2",2,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,2,1,2); 
 	define_number_variable(MODULE_GPIO,CONFIG_GPIO_EXT_IO3 ,"config_gpio_ext_io3",0,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,2,1,2); 
-    define_number_variable(MODULE_4G,CONFIG_4G_ONOFF,"4g_onoff",0,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,2,0,1);
+    define_number_variable(MODULE_4G,CONFIG_4G_ONOFF,"4g_onoff",1,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,2,0,1);
     define_string_variable(MODULE_4G,CONFIG_4G_APN,"4g_apn","ctlte",50,CONFIG_FLAG_REBOOT,CONFIG_STRING_NORMAL,0,49);
     define_number_variable(MODULE_4G,CONFIG_4G_AUTH_NEED,"4g_auth_need",1,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,2,0,1);
     define_number_variable(MODULE_4G,CONFIG_4G_AUTH_TYPE,"4g_auth_type",1,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,3,0,1,2);
@@ -83,7 +83,7 @@ void define_user_config(void)
     define_number_variable(MODULE_4G,CONFIG_4G_CPIN_SECONDS,"4g_cpin_seconds",60,sizeof(uint16_t),0,CONFIG_NUMBER_NORMAL,2,10,300);
     define_number_variable(MODULE_4G,CONFIG_4G_CSQ_SECONDS,"4g_csq_seconds",30,sizeof(uint16_t),0,CONFIG_NUMBER_NORMAL,2,10,300);
     define_number_variable(MODULE_4G,CONFIG_4G_CREG_SECONDS,"4g_creg_seconds",60,sizeof(uint16_t),0,CONFIG_NUMBER_NORMAL,2,10,300);
-    define_number_variable(MODULE_WIFI,CONFIG_WIFI_MODE,"wifi_mode",0,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,4,0,1,2,3);
+    define_number_variable(MODULE_WIFI,CONFIG_WIFI_MODE,"wifi_mode",1,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,4,0,1,2,3);
     define_string_variable(MODULE_WIFI,CONFIG_WIFI_AP_STA_SSID,"wifi_ap_sta_ssid","second",30,CONFIG_FLAG_REBOOT,CONFIG_STRING_NORMAL,1,29);
     define_string_variable(MODULE_WIFI,CONFIG_WIFI_AP_STA_PASSWORD,"wifi_ap_sta_password","fuxiaohu1%",20,CONFIG_FLAG_REBOOT,CONFIG_STRING_NORMAL,0,19);
     define_number_variable(MODULE_WIFI,CONFIG_WIFI_AP_CHANNEL,"wifi_ap_channel",6,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,1,14);
@@ -136,8 +136,8 @@ void define_user_config(void)
     define_number_variable(MODULE_THERMAL,CONFIG_THERMAL_SHIFT,"thermal_shift",800,sizeof(uint32_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,0,0xffffffff);
     define_number_variable(MODULE_ULTRASONIC,CONFIG_ULTRASONIC_ONOFF,"ultrasonic_onoff",1,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,2,0,1);
     define_number_variable(MODULE_ULTRASONIC,CONFIG_ULTRASONIC_UPLOAD_INTERVAL_SECONDS,"ultrasonic_upload_interval_seconds",10,sizeof(uint32_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,0,0xffffffff);
-    define_number_variable(MODULE_ULTRASONIC,CONFIG_ULTRASONIC_PIN_TRIG,"ultrasonic_pin_trig",1,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,0,0xffff);
- 	define_number_variable(MODULE_ULTRASONIC,CONFIG_ULTRASONIC_PIN_ECHO,"ultrasonic_pin_echo",21,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,0,0xffff);
+    define_number_variable(MODULE_ULTRASONIC,CONFIG_ULTRASONIC_PIN_TRIG,"ultrasonic_pin_trig",16,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,0,0xffff);
+ 	define_number_variable(MODULE_ULTRASONIC,CONFIG_ULTRASONIC_PIN_ECHO,"ultrasonic_pin_echo",1,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,0,0xffff);
     define_number_variable(MODULE_ULTRASONIC,CONFIG_ULTRASONIC_MEASURE_MILLI_SECONDS,"ultrasonic_measure_milli_seconds",1,sizeof(uint32_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,1,0xffffffff);
     define_number_variable(MODULE_ULTRASONIC,CONFIG_ULTRASONIC_COMPENSATION_MODE,"ultrasonic_compensation_mode",1,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,3,0,1,2);
     define_number_variable(MODULE_ULTRASONIC,CONFIG_ULTRASONIC_COMPENSATION_VALUE,"ultrasonic_compensation_value",70,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,0,0xffff);
