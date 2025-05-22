@@ -3,7 +3,7 @@
 //--------------------------------------------- 测试默认配置 ---------------------------------------------
 
 #define LORA_FRE									433000000	// 收发频率
-#define LORA_TX_OUTPUT_POWER                        3        // 用了带PA的，不能超过3否则会烧毁PA，测试默认使用的发射功率，126x发射功率0~22dbm，127x发射功率2~20dbm
+#define LORA_TX_OUTPUT_POWER                        1        // 用了带PA的，不能超过3否则会烧毁PA，测试默认使用的发射功率，126x发射功率0~22dbm，127x发射功率2~20dbm
 #define LORA_BANDWIDTH                              1         // [0: 125 kHz,	测试默认使用的带宽，LLCC68：[0: 125 kHz,1: 250 kHz,2: 500 kHz,3: Reserved]
 #define LORA_SPREADING_FACTOR                       10         // 测试默认使用的扩频因子范围7~12
 #define LORA_CODINGRATE                             1         // 测试默认使用的纠错编码率[1: 4/5,2: 4/6,3: 4/7,4: 4/8]

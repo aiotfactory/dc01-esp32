@@ -14,10 +14,12 @@
 static const char *TAG = "spiutil";
 static uint8_t spi2_bus_inited=0;
 
-
-
-
 SemaphoreHandle_t  spi_semaphore_handle=NULL;
+
+typedef struct {
+  	uint8_t command_bits;
+  	uint8_t address_bits;
+} spi_util_device_config;
 
 typedef struct {
     spi_device_handle_t device_handle;
@@ -26,6 +28,7 @@ typedef struct {
   	uint32_t tx_times;
   	uint32_t rx_times;
   	uint32_t failed_times;
+  	spi_util_device_config config;	
 } spi_util_device_info;
 
 static spi_util_device_info all_spi_device[SPI_ALL]={0};
@@ -182,6 +185,14 @@ void spi_property(uint8_t *data_out,int *data_len_out)
 	user_free(temp_buf);
 	temp_buf=NULL;
 }
+static void config_copy(spi_util_device_info *info,spi_device_interface_config_t *devcfg_in)
+{
+	if(info!=NULL && devcfg_in!=NULL)
+	{
+		info->config.address_bits=devcfg_in->address_bits;
+		info->config.command_bits=devcfg_in->command_bits;
+	}
+}
 spi_device_handle_t spiutil_init(spiutil_device_t device, char *device_name,spi_device_interface_config_t *devcfg_in)
 {
 	esp_err_t ret;
@@ -221,6 +232,7 @@ spi_device_handle_t spiutil_init(spiutil_device_t device, char *device_name,spi_
 				.mode = 0, .spics_io_num = -1, .cs_ena_posttrans = 3, //Keep the CS low 3 cycles after transaction, to stop slave from missing the last bit when CS has less propagation delay than CLK
 				.queue_size = 3, .pre_cb=spi_cs_tm7705_pre_cb, .post_cb=spi_cs_tm7705_post_cb };
 		ret = spi_bus_add_device_safe("init tm7705",SPI_HOST, &devcfg, &(all_spi_device[SPI_TM7705].device_handle));
+ 		config_copy(&all_spi_device[SPI_TM7705],&devcfg);
  		if(ret != ESP_OK)        
  			util_reboot(7);
 		ESP_LOGI(TAG, "spi_bus_add_device %s",device_name);
@@ -231,6 +243,7 @@ spi_device_handle_t spiutil_init(spiutil_device_t device, char *device_name,spi_
 		all_spi_device[device].device_name=device_name;
 		spi_cs_pins_default();
 		ret = spi_bus_add_device_safe(device_name,SPI_HOST, devcfg_in, &(all_spi_device[device].device_handle));
+		config_copy(&all_spi_device[device],devcfg_in);
  		if(ret != ESP_OK)        
  			util_reboot(8);
 		ESP_LOGI(TAG, "spi_bus_add_device %s",device_name);
@@ -242,6 +255,7 @@ spi_device_handle_t spiutil_init(spiutil_device_t device, char *device_name,spi_
 		spi_cs_pins_default();
 		if(devcfg_in!=NULL){
 			ret = spi_bus_add_device_safe(device_name,SPI_HOST, devcfg_in, &(all_spi_device[device].device_handle));
+			config_copy(&all_spi_device[SPI_W5500],devcfg_in);
 	 		if(ret != ESP_OK)        
 	 			util_reboot(8);
  		}
@@ -259,6 +273,7 @@ spi_device_handle_t spiutil_init(spiutil_device_t device, char *device_name,spi_
 				.mode = 0, .spics_io_num = -1, .cs_ena_posttrans = 3, //Keep the CS low 3 cycles after transaction, to stop slave from missing the last bit when CS has less propagation delay than CLK
 				.queue_size = 3 };
 		ret = spi_bus_add_device_safe("init lora",SPI_HOST, &devcfg,&(all_spi_device[SPI_LORA].device_handle));
+		config_copy(&all_spi_device[SPI_LORA],&devcfg);
  		if(ret != ESP_OK)        
  			util_reboot(6);
 		ESP_LOGI(TAG, "spi_bus_add_device %s",device_name);
@@ -440,6 +455,7 @@ esp_err_t spiutil_inout(spiutil_device_t device,uint64_t address,uint8_t address
 {    
     esp_err_t ret;
     spi_transaction_t t;
+    uint8_t *data_send_temp=NULL;
     memset(&t, 0, sizeof(t));   
     cloud_printf("spi inout ");
     if(address_valid>0)
@@ -457,11 +473,23 @@ esp_err_t spiutil_inout(spiutil_device_t device,uint64_t address,uint8_t address
 	}
 	if(data_send_len>0)
 	{
-		t.length = 8*data_send_len;
     	t.tx_buffer = data_send;     
     	cloud_printf_format("tx data "," ", "%02x",data_send,data_send_len);
-    }  
-	if(data_recv_len>0){
+    }
+    
+    t.length = all_spi_device[device].config.address_bits+all_spi_device[device].config.command_bits+8*data_send_len;
+    if(t.length<8*data_recv_len)
+    {
+    	t.length=8*data_recv_len;
+    	if(data_send_len>0){
+	    	data_send_temp=user_malloc(t.length/8+1);
+	    	memcpy(data_send_temp,data_send,data_send_len);
+	    	t.tx_buffer=data_send_temp;
+    	}
+    } 	 
+	
+	if(data_recv_len>0)
+	{
 		all_spi_device[device].rx_times++;
 		t.rx_buffer = data_recv;   
 		t.rxlength=8*data_recv_len;
@@ -471,6 +499,8 @@ esp_err_t spiutil_inout(spiutil_device_t device,uint64_t address,uint8_t address
 		 cloud_printf_format("rx data "," ", "%02x",data_recv,data_recv_len);
 	}
  	cloud_printf("\r\n");
+ 	if(data_send_temp!=NULL)
+ 		user_free(data_send_temp);
  	return ret;
 }
 esp_err_t spiutil_w5500_read(uint32_t address,uint8_t *data,int16_t len)

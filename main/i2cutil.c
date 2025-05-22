@@ -49,7 +49,6 @@ void i2c_deinit(void)
 	//ESP_LOGI(TAG, "i2c deinit");
 	init=0;
 	i2c_driver_delete(I2C_NUM_0);
-	ESP_LOGI(TAG, "x6");
 	tm7705_off();//share the same power;
 	power_onoff_i2c(0);
 	util_delay_ms(3000);
@@ -74,6 +73,7 @@ esp_err_t  i2c_write(uint8_t addr,uint8_t *data,uint16_t size)
 		i2c_cmd_link_delete(cmd);
 		xSemaphoreGive(i2c_semaphore_handle);
     }
+    //print_format(NULL,0,"%02x","i2c_write ", "\r\n",data,size);
     return ret;
 }
 esp_err_t  i2c_write_reg(uint8_t addr,uint8_t reg,uint8_t *data,uint16_t size)
@@ -113,6 +113,7 @@ esp_err_t  i2c_read(uint8_t addr,uint8_t *data,uint16_t size)
 		i2c_cmd_link_delete(cmd);
 		xSemaphoreGive(i2c_semaphore_handle);
     }
+    //print_format(NULL,0,"%02x","i2c_read ", "\r\n",data,size);
     return ret;
 }
 esp_err_t  i2c_read_reg(uint8_t addr,uint8_t *reg,uint8_t reg_len,uint8_t *data,uint16_t size)
@@ -180,7 +181,7 @@ int command_operate_i2c_inout(uint8_t *command,uint32_t command_len,uint8_t *dat
 	if(init==0)
 	{
 		esp_ret=i2c_init(clock_speed_hz);
-		if(esp_ret!=ESP_OK)
+		if(esp_ret==0)
 		{
 			sprintf((char *)data_return+1,"i2c init clk %lu failed due to 0x%x",clock_speed_hz,esp_ret);
 			ret=-1;

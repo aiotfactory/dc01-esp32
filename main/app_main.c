@@ -130,8 +130,6 @@ void app_main(void)
 	//turn on i2c power
 	power_onoff_i2c(1); //since tm7705 is using i2c power, so you need to turn it on, or it will impact other spi devices	    
 	
-	//ultrasonic_upload(NULL);
-	
 	//4g
 	if(device_config_get_number(CONFIG_4G_ONOFF))
 	{
@@ -235,7 +233,7 @@ void app_main(void)
 		
 		if(util_get_run_seconds()>10*60)//will stop after 10 minutes from rebooting
 			ble_stop();
-		ESP_LOGI(TAG, "loop times %lu task success %lu fail %lu seconds %lu",loop_times,task_success_times,task_fail_times,util_get_run_seconds());
+		//ESP_LOGI(TAG, "loop times %lu task success %lu fail %lu seconds %lu",loop_times,task_success_times,task_fail_times,util_get_run_seconds());
 	}
 }
 
