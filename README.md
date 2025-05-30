@@ -6,7 +6,7 @@
   
 # Project Introduction
 
-Our company has over 20 years of experience in embedded R&D, production, and IoT platform development. Based on extensive customer feedback, we have developed this open-hardware device.
+We has over 20 years of experience in embedded R&D, production, and IoT platform development. Based on extensive customer feedback, we have developed this open-hardware device.
 
 Most customers need to perform rapid validation before starting a new project. To support this, we have integrated as many core components as possible — including various sensors, connectivity modules, and power options — into a single product. We also provide online programming and flashing capabilities to help customers validate their ideas quickly and at minimal cost.
 
