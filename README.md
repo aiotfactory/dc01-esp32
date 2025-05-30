@@ -12,7 +12,7 @@ Most customers need to perform rapid validation before starting a new project. T
 
 When customers are ready for mass production, redundant components can be trimmed based on actual needs — ensuring the design includes just enough components to meet functional requirements while minimizing costs. Customers can either optimize the design themselves or commission us to assist with customized development and manufacturing.
 
-<img src="docs/pcb02.jpg" alt="PCB Image" width="300"/>
+<img src="docs/pcb02.png" alt="PCB Image" width="300"/>
 
 ## Sensors
 
