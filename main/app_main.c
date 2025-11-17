@@ -134,7 +134,7 @@ void app_main(void)
 	power_onoff_i2c(1); //since tm7705 is using i2c power, so you need to turn it on, or it will impact other spi devices	    
 	
 	
-	ble_central_init();
+	blecent_init();
 	util_pause(NULL);
 	
 	
