@@ -21,6 +21,12 @@ uint8_t i2c_init(uint32_t clk)
 			power_onoff_i2c(1);
 		if(i2c_semaphore_handle==NULL)
 			i2c_semaphore_handle=xSemaphoreCreateMutex();
+		
+		//重置下scl
+	    util_gpio_init(41,GPIO_MODE_OUTPUT,0,0,0);
+	    vTaskDelay(pdMS_TO_TICKS(20));
+	    gpio_set_level(41,1);
+	    
 		i2c_config_t conf = {
 			.mode = I2C_MODE_MASTER,
 			.sda_io_num = 42,

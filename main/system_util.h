@@ -21,9 +21,8 @@
 #include <esp_err.h>
 #include <esp_event.h>
 #include <esp_event_base.h>
-#include "esp32s3/rom/md5_hash.h"
 #include "device_config.h"
-
+#include "esp_http_client.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -191,7 +190,6 @@ extern int rt_power;
  * After the device is powered on, the number of times it has been restarted can be tracked.
  */
 extern int rt_power_times;
-
 /**
  * System configuration structure for initialization.
  * 系统初始化配置结构体
@@ -212,6 +210,8 @@ typedef struct {
     uint8_t core_log;                   /**< Enable core module logging (0: disable, 1: enable) / 是否启用核心模块日志（0：禁用，1：启用） */
     uint8_t mem_debug;                  /**< Enable memory debug mode (0: disable, 1: enable) / 是否启用内存调试模式（0：禁用，1：启用） */
     uint8_t cloud_log;                  /**< Cloud log level or flag / 云端日志等级或开关标志 */
+    uint8_t reset_config;
+    uint8_t uart_feedback;
 } system_config_t;
 
 /**
@@ -381,6 +381,10 @@ void util_delay_ms(uint32_t timeinms);
  *        ota镜像验证（14）、设置启动分区（15）、OTA成功完成（16）、回滚（17）、esp_ota_end（18）。
  * 19: 表示网络设置恢复后触发的重启（network restore）。
  * 20: 表示BLE模块触发的重启（ble reboot）。
+ * 21: 没有网络
+ * 22: 云端请求重启
+ * 23: 配置4g ml307重启
+ * 24: ping失败
  * 
  * This function triggers a system reboot. The input parameter flag carries additional information indicating the reason or mode of the reboot.
  * The flag is first stored in Flash memory and automatically retrieved after the system reboots. It is then sent to the cloud, allowing the cloud 
@@ -401,7 +405,7 @@ void util_delay_ms(uint32_t timeinms);
  * 20: Indicates a reboot triggered by the BLE module (ble reboot).
  */
 void util_reboot(uint32_t flag);
-
+void util_reboot_delay(uint32_t flag,uint32_t seconds);
 /**
  * 和util_reboot类似，该函数也会将重启标志写入Flash，但不会真正执行系统重启操作。
  * 该函数的主要作用是记录重启标志到Flash中，以便在后续的系统运行中可以读取并处理这些标志。
@@ -458,6 +462,14 @@ void *user_malloc_exe(const char *file,const uint32_t line, const char * func, u
  */
 void user_malloc_print(uint32_t min_count);
 
+void esp_http_close(esp_http_client_handle_t *client);
+esp_http_client_handle_t esp_http_send(char *url, char *path, char *header[][2], uint8_t header_num, uint8_t *content, uint32_t content_len,uint32_t timeout,int *content_length);
+int esp_http_read(esp_http_client_handle_t esp_http_client, uint8_t *data, int data_len);
+uint8_t esp_http_complete(esp_http_client_handle_t esp_http_client);
+
+//#define mem_stack(prefix) ESP_LOGI(prefix,"stack high water mark %d", uxTaskGetStackHighWaterMark(NULL))
+#define mem_stack(prefix) ((void)0)
+                                          
 #ifdef __cplusplus
 }
 #endif

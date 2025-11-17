@@ -22,10 +22,13 @@
 #include "cloud_log.h"
 #include "aht20.h"
 #include "spl06.h"
-#include "ble_util.h"
+#include "ble_prph_util.h"
+#include "ble_central_util.h"
 #include "esp_partition.h"
 #include "esp_ota_ops.h"
 #include "esp_app_format.h"
+#include "mqtt_util.h"
+
 
 static const char *TAG = "app_main";
 
@@ -113,13 +116,13 @@ void app_main(void)
 	//print_chip_info();
 	//print_mem_info();
 	
-	ble_start();//allow user to config device by BLE
+	//ble_start();//allow user to config device by BLE
 	ch423_init();//init ch423 to turn on ext gpio
 	ESP_LOGI(TAG, "gpio ext module is turned on");
 	spi_cs_pins_default();//set all spi cs pins to high
 	ESP_LOGI(TAG, "all spi cs pins are pulled up");
-	ESP_LOGI(TAG, "wait for 3 seconds to ensure all the electricity from the capacitor is released");
-	util_delay_ms(3000);
+	ESP_LOGI(TAG, "wait for 1 seconds to ensure all the electricity from the capacitor is released");
+	util_delay_ms(1000);
 	
 	app_evt_group_hdl = xEventGroupCreate();//create bits for sync
     assert(app_evt_group_hdl != NULL);
@@ -129,6 +132,11 @@ void app_main(void)
 	
 	//turn on i2c power
 	power_onoff_i2c(1); //since tm7705 is using i2c power, so you need to turn it on, or it will impact other spi devices	    
+	
+	
+	ble_central_init();
+	util_pause(NULL);
+	
 	
 	//4g
 	if(device_config_get_number(CONFIG_4G_ONOFF))
@@ -182,6 +190,10 @@ void app_main(void)
 	}
 	print_mem_info();
 
+
+	mqtt_init();
+	util_pause(NULL);
+
 	uint32_t loop_times=0,task_success_times=0,task_fail_times=0,temp_interval=0;
 	while(1)
 	{
@@ -231,8 +243,8 @@ void app_main(void)
 		#endif
 		loop_wait_on_interrupt(LOOP_INTERVAL_TICKS);
 		
-		if(util_get_run_seconds()>10*60)//will stop after 10 minutes from rebooting
-			ble_stop();
+		//if(util_get_run_seconds()>10*60)//will stop after 10 minutes from rebooting
+		//	ble_stop();
 		ESP_LOGI(TAG, "loop times %lu task success %lu fail %lu seconds %lu",loop_times,task_success_times,task_fail_times,util_get_run_seconds());
 	}
 }

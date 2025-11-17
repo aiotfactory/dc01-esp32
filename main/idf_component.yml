@@ -5,12 +5,9 @@ dependencies:
   iot_usbh_modem:
     version: ">=0.2.0"
     override_path: "../common_components/iot_usbh_modem"
-  camera:
-    version: "*"
-    override_path: "../common_components/camera"
-  esp32-camera:
-    version: ">=2.0.3"
-    override_path: "../common_components/esp32-camera"
+  espressif/esp32-camera: 2.1.2
+  nimble_central_utils:
+    path: ../common_components/nimble_central_utils
     
   #for lib compile
   #comm_core:
