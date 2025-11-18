@@ -251,7 +251,7 @@ int ultrasonic_upload(void *parameter)
 		return ret;
 	ret=tcp_send_command(
       "ultrasonic",
-      data_container_create(1,COMMAND_REQ_ULTRASONIC,temp_buf, temp_buf_idx),
+      data_container_create(1,COMMAND_REQ_ULTRASONIC,temp_buf, temp_buf_idx,NULL),
       NULL, 0, COMMAND_FLAG_FROM_DEVICE | COMMAND_FLAG_INIT_FROM_DEVICE,
       SOCKET_HANDLER_ONE_TIME, 0,NULL);
 

@@ -306,7 +306,7 @@ static void lora_task(void *pvParameters)
 				lora_data_buf[0]=1;//data
 				tcp_send_command(
 			      "lora_rx",
-			      data_container_create(0,COMMAND_REQ_LORA,lora_data_buf, lora_data_buf_idx),
+			      data_container_create(0,COMMAND_REQ_LORA,lora_data_buf, lora_data_buf_idx,NULL),
 			      NULL, 0, COMMAND_FLAG_FROM_DEVICE | COMMAND_FLAG_INIT_FROM_DEVICE,
 			      SOCKET_HANDLER_ONE_TIME, 0,NULL);
 			}
@@ -336,7 +336,7 @@ int lora_util_upload(void *parameter)
 	lora_util_property(temp_buf,&temp_buf_idx);
 	ret=tcp_send_command(
 	      "lora_meta",
-	      data_container_create(1,COMMAND_REQ_LORA,temp_buf, temp_buf_idx),
+	      data_container_create(1,COMMAND_REQ_LORA,temp_buf, temp_buf_idx,NULL),
 	      NULL, 0, COMMAND_FLAG_FROM_DEVICE | COMMAND_FLAG_INIT_FROM_DEVICE,
 	      SOCKET_HANDLER_ONE_TIME, 0,NULL);
 	

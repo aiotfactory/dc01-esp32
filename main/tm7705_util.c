@@ -234,7 +234,7 @@ int tm7705_upload(void *pvParameters)
 	tm7705_exe(ml_value);
 	return tcp_send_command(
 	      "tm7705_period",
-	      data_container_create(1,COMMAND_REQ_TM7705,ml_value_p, sizeof(int)*3+1),
+	      data_container_create(1,COMMAND_REQ_TM7705,ml_value_p, sizeof(int)*3+1,NULL),
 	      NULL, 0, COMMAND_FLAG_FROM_DEVICE | COMMAND_FLAG_INIT_FROM_DEVICE,
 	      SOCKET_HANDLER_ONE_TIME, 0,NULL);
 }

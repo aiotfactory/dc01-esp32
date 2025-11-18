@@ -368,6 +368,13 @@ typedef enum {
     CONFIG_ULTRASONIC_TRIGGER_TIMES,
     CONFIG_ULTRASONIC_TRIGGER_MIN,
     CONFIG_ULTRASONIC_TRIGGER_MAX,
+    CONFIG_DTU_ONOFF,
+    CONFIG_DTU_MQTT_URL,
+    CONFIG_DTU_MQTT_PORT,
+    CONFIG_DTU_MQTT_USER,
+    CONFIG_DTU_MQTT_PASSWORD,
+    CONFIG_DTU_MQTT_HINT_NAME,
+    CONFIG_DTU_MQTT_HINT_HEX_KEY,
     CONFIG_NAME_MAX
 } config_name;
 
@@ -408,7 +415,9 @@ typedef enum {
     MODULE_PIR=20,
     MODULE_THERMAL=21,
     MODULE_ULTRASONIC=22,
-    MODULE_MAX
+    MODULE_AUDIO=23,
+    MODULE_DTU=24,
+    MODULE_MAX=25
 } config_module;
 
 
@@ -614,7 +623,9 @@ typedef struct data_send_element {
     struct data_send_element *tail;
 } data_send_element;
 
-typedef struct data_send_container {
+typedef int (*socket_recv_callback)(uint32_t command,uint32_t flag,int32_t errorType,uint32_t pack_seq,const uint8_t *data_in,uint32_t data_in_len);
+
+typedef struct data_send_container_t {
     /**
      * 表示发送过程中是否记录日志。
      * Indicates whether logs should be recorded during sending.
@@ -638,6 +649,7 @@ typedef struct data_send_container {
      * Points to the data_send_element.
      */
     data_send_element *element;
+	socket_recv_callback callback; 
 } data_send_container;
 
 
@@ -659,11 +671,6 @@ uint8_t config_write(void);
  */
 uint32_t config_to_stream(uint8_t *buf);
 
-/**
- * 序列化配置项到buf中，返回buf的总长度，如果buf为NULL，只计算总长度并返回。
- * Serializes the configuration items into buf, returns the total length of buf. If buf is NULL, only calculates and returns the total length.
- */
-uint32_t config_to_stream(uint8_t *buf);
 
 /**
  * 序列化配置项，并设置到输入的data_element中，为发送配置内容到云端做准备。

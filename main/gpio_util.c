@@ -181,7 +181,7 @@ void gpio_util_interrupt_upload(uint32_t gpio_value)
 	memcpy(temp_buf+1,&gpio_value,4);
 	tcp_send_command(
 	      "gpio_isr",
-	      data_container_create(1,COMMAND_REQ_GPIO,temp_buf, 5),
+	      data_container_create(1,COMMAND_REQ_GPIO,temp_buf, 5,NULL),
 	      NULL, 0, COMMAND_FLAG_FROM_DEVICE | COMMAND_FLAG_INIT_FROM_DEVICE,
 	      SOCKET_HANDLER_ONE_TIME, 0,NULL);
 }
@@ -354,7 +354,7 @@ int gpio_util_upload(void *parameter)
 		data_out[0]=4;
 		ret=tcp_send_command(
 	      "gpio_isr",
-	      data_container_create(1,COMMAND_REQ_GPIO,data_out, data_len_out),
+	      data_container_create(1,COMMAND_REQ_GPIO,data_out, data_len_out,NULL),
 	      NULL, 0, COMMAND_FLAG_FROM_DEVICE | COMMAND_FLAG_INIT_FROM_DEVICE,
 	      SOCKET_HANDLER_ONE_TIME, 0,NULL);
 	}else{

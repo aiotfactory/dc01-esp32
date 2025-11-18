@@ -81,7 +81,7 @@ int uart_util_upload(void *parameter)
 		COPY_TO_BUF_WITH_NAME(tx_times_failed,temp_buf,temp_buf_idx);
 		ret=tcp_send_command(
 		      "uart_meta",
-		      data_container_create(1,COMMAND_REQ_UART,temp_buf, temp_buf_idx),
+		      data_container_create(1,COMMAND_REQ_UART,temp_buf, temp_buf_idx,NULL),
 		      NULL, 0, COMMAND_FLAG_FROM_DEVICE | COMMAND_FLAG_INIT_FROM_DEVICE,
 		      SOCKET_HANDLER_ONE_TIME, 0,NULL);
 		return ret;
@@ -109,7 +109,7 @@ void uart_util_queue(void)
 				rx_buf[0]=1;//dtu uart data
 				if(tcp_send_command(
 			      "uart_rx",
-			      data_container_create(1,COMMAND_REQ_UART,rx_buf, rx_len+1),
+			      data_container_create(1,COMMAND_REQ_UART,rx_buf, rx_len+1,NULL),
 			      NULL, 0, COMMAND_FLAG_FROM_DEVICE | COMMAND_FLAG_INIT_FROM_DEVICE,
 			      SOCKET_HANDLER_ONE_TIME, 0,NULL)<0)
 					rx_upload_failed_times++;

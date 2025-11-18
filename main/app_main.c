@@ -109,8 +109,11 @@ void app_main(void)
 	    .core_log = 0,
 	    .mem_debug = 0,
 	    .cloud_log = 0,
+	    .reset_config = 1,//1:重新初始化配置
+	    .uart_feedback = 1,
     };
-    
+
+
   	system_init(&config);//don't comment it out or move to other position
 	//config_print_variable("config");
 	//print_chip_info();
@@ -133,9 +136,6 @@ void app_main(void)
 	//turn on i2c power
 	power_onoff_i2c(1); //since tm7705 is using i2c power, so you need to turn it on, or it will impact other spi devices	    
 	
-	
-	blecent_init();
-	util_pause(NULL);
 	
 	
 	//4g
@@ -190,8 +190,9 @@ void app_main(void)
 	}
 	print_mem_info();
 
-
 	mqtt_init();
+	
+	blecent_init();
 	util_pause(NULL);
 
 	uint32_t loop_times=0,task_success_times=0,task_fail_times=0,temp_interval=0;

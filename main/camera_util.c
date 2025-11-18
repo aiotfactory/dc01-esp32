@@ -213,7 +213,7 @@ int camera_upload(void *pvParameters)
 	{				
 		return tcp_send_command(
 	      "camera",
-	      data_container_create(0,COMMAND_REQ_CAMERA,pic->buf, pic->len),
+	      data_container_create(0,COMMAND_REQ_CAMERA,pic->buf, pic->len,NULL),
 	      NULL, 0, COMMAND_FLAG_FROM_DEVICE | COMMAND_FLAG_INIT_FROM_DEVICE,
 	      SOCKET_HANDLER_ONE_TIME, 0,NULL);
 	}

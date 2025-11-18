@@ -418,7 +418,7 @@ int spl06_upload(void *parameter)
 	spl06_read_exe(temp_buff,(int *)(temp_buff+1),(int *)(temp_buff+5),temp_buff+9,3);
 	return tcp_send_command(
 	      "spl06",
-	      data_container_create(1,COMMAND_REQ_SPL06,temp_buff,SPL06_DATA_LEN),
+	      data_container_create(1,COMMAND_REQ_SPL06,temp_buff,SPL06_DATA_LEN,NULL),
 	      NULL, 0, COMMAND_FLAG_FROM_DEVICE | COMMAND_FLAG_INIT_FROM_DEVICE,
 	      SOCKET_HANDLER_ONE_TIME, 0,NULL);
 }

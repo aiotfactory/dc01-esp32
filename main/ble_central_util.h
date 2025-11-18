@@ -25,14 +25,12 @@
 extern "C" {
 #endif
 
-struct ble_hs_adv_fields;
-struct ble_gap_conn_desc;
-struct ble_hs_cfg;
-union ble_store_value;
-union ble_store_key;
+
 
 
 void blecent_init(void);
+void blecent_cloud_command(char *command);
+
 
 #ifdef __cplusplus
 }

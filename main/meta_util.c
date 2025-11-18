@@ -64,7 +64,7 @@ int meta_upload(void *parameter)
 	//ESP_LOGE(TAG, "x1 %d",temp_buf_idx);
 	ret=tcp_send_command(
 	      "meta",
-	      data_container_create(1,COMMAND_REQ_META,temp_buf, temp_buf_idx),
+	      data_container_create(1,COMMAND_REQ_META,temp_buf, temp_buf_idx,NULL),
 	      NULL, 0, COMMAND_FLAG_FROM_DEVICE | COMMAND_FLAG_INIT_FROM_DEVICE,
 	      SOCKET_HANDLER_ONE_TIME, 0,NULL);
 	//ESP_LOGI(TAG, "meta_upload times %lu ret %d len %d",al_meta_times,ret,temp_buf_idx);

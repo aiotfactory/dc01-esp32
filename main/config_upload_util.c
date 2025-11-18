@@ -19,7 +19,7 @@ int config_upload(void *parameter)
 	config_to_stream(config_stream);			
  	return tcp_send_command(
       "config",
-      data_container_create(1,COMMAND_REQ_CONFIG,config_stream, config_stream_len),
+      data_container_create(1,COMMAND_REQ_CONFIG,config_stream, config_stream_len,NULL),
       NULL, 0, COMMAND_FLAG_FROM_DEVICE | COMMAND_FLAG_INIT_FROM_DEVICE,
       SOCKET_HANDLER_ONE_TIME, 0,NULL);
 }

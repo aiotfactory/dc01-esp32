@@ -147,5 +147,13 @@ void define_user_config(void)
     define_number_variable(MODULE_ULTRASONIC,CONFIG_ULTRASONIC_TRIGGER_TIMES,"ultrasonic_trigger_times",1,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,0,0xffff);
     define_number_variable(MODULE_ULTRASONIC,CONFIG_ULTRASONIC_TRIGGER_MIN,"ultrasonic_trigger_min",0,sizeof(uint32_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,0,0xffffffff);
     define_number_variable(MODULE_ULTRASONIC,CONFIG_ULTRASONIC_TRIGGER_MAX,"ultrasonic_trigger_max",0,sizeof(uint32_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,0,0xffffffff);    
+ 	define_number_variable(MODULE_DTU,CONFIG_DTU_ONOFF,"dtu_onoff",1,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,2,0,1);
+    define_string_variable(MODULE_DTU,CONFIG_DTU_MQTT_URL,"dtu_mqtt_url","mqtts://139.196.107.200",50,CONFIG_FLAG_REBOOT,CONFIG_STRING_NORMAL,0,49);
+ 	define_number_variable(MODULE_DTU,CONFIG_DTU_MQTT_PORT,"dtu_mqtt_port",1883,sizeof(uint32_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,10,0xffffffff);
+    define_string_variable(MODULE_DTU,CONFIG_DTU_MQTT_USER,"dtu_mqtt_user","user",50,CONFIG_FLAG_REBOOT,CONFIG_STRING_NORMAL,0,49);
+    define_string_variable(MODULE_DTU,CONFIG_DTU_MQTT_PASSWORD,"dtu_mqtt_password","quitto12vers",50,CONFIG_FLAG_REBOOT,CONFIG_STRING_NORMAL,0,49);
+	define_string_variable(MODULE_DTU,CONFIG_DTU_MQTT_HINT_NAME,"dtu_mqtt_hint_name","hint",50,CONFIG_FLAG_REBOOT,CONFIG_STRING_NORMAL,0,49);
+	define_string_variable(MODULE_DTU,CONFIG_DTU_MQTT_HINT_HEX_KEY,"dtu_mqtt_hint_hex_key","BAD123",50,CONFIG_FLAG_REBOOT,CONFIG_STRING_NORMAL,0,49);
+
 #endif
 }

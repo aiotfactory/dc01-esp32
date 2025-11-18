@@ -26,7 +26,7 @@ int forward_upload(void *parameter)
 	int temp_buff_len=strlen((char *)temp_buff);
 	ret=tcp_send_command(
 	      "forward",
-	      data_container_create(1,COMMAND_REQ_FORWARD,temp_buff,temp_buff_len),
+	      data_container_create(1,COMMAND_REQ_FORWARD,temp_buff,temp_buff_len,NULL),
 	      NULL, 0, COMMAND_FLAG_FROM_DEVICE | COMMAND_FLAG_INIT_FROM_DEVICE,
 	      SOCKET_HANDLER_ONE_TIME, 0,NULL);
 	times++;

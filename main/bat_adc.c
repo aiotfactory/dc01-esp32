@@ -71,7 +71,7 @@ int bat_adc_upload(void *parameter)
 	int ret=bat_adc_read(temp_buff,&temp_buff_len);	
 	ret=tcp_send_command(
       "bat_adc",
-      data_container_create(1,COMMAND_REQ_BAT_ADC,temp_buff,temp_buff_len),
+      data_container_create(1,COMMAND_REQ_BAT_ADC,temp_buff,temp_buff_len,NULL),
       NULL, 0, COMMAND_FLAG_FROM_DEVICE | COMMAND_FLAG_INIT_FROM_DEVICE,
       SOCKET_HANDLER_ONE_TIME, 0,NULL);
 	return ret;

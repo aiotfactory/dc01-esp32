@@ -29,9 +29,9 @@
 #include "cJSON.h"
 #include "util.h"
 #include "system_util.h"
+#include "mqtt_util.h"
 
-
-struct ble_find_condition {
+typedef struct ble_find_condition {
     int id;
     int adv_prefix_start;
     int adv_prefix_len;
@@ -40,24 +40,28 @@ struct ble_find_condition {
     int mac_len;
     char service[64];
     char character[64];
-};
+   	uint8_t *write_value;
+   	int write_value_len;
+   	uint8_t write_feedback;
+} ble_find_condition_t;
 
-struct ble_info {
-	struct ble_find_condition condition;
+
+typedef struct ble_info {
+	ble_find_condition_t condition;
 	int rssi;
 	char mac[13];
-};
+} ble_info_t;
 
 static const char *TAG = "ble_central_util";
 #define MAX_ADV_INFOS 50
-static struct ble_find_condition g_adv_list[MAX_ADV_INFOS];
+static ble_find_condition_t g_adv_list[MAX_ADV_INFOS];
 static int g_adv_count = 0;
 static SemaphoreHandle_t g_adv_mutex = NULL;
 
 
 
 static int blecent_gap_event(struct ble_gap_event *event, void *arg);
-static int blecent_read(const struct peer *peer,struct ble_info *info);
+static int blecent_read(const struct peer *peer,ble_info_t *info);
 static void blecent_scan(void);
 
 void ble_store_config_init(void);
@@ -114,17 +118,17 @@ static char *uint8_to_hex(const uint8_t *bin, int bin_len) {
     }
     return hex;
 }
-/*
+
+static void ble_info_free(ble_info_t *info)
 {
-  "id": 3,
-  "adv_prefix_start": 5,
-  "adv_prefix_value": "DC02",
-  "mac": "112233445566",
-  "service": "FB349B5F-8000-0080-0010-0000FFF00000",
-  "character": "FB349B5F-8000-0080-0010-0000FFF20000"
+	if(info!=NULL)
+	{
+		if(info->condition.write_value_len>0)
+			user_free(info->condition.write_value);
+		user_free(info);
+	}
 }
-*/
-static int adv_info_parse(const char *input_str, struct ble_find_condition *out_info) {
+static int ble_info_parse(const char *input_str, ble_find_condition_t *out_info) {
     if (out_info == NULL || input_str == NULL) return 0;
 
     cJSON *root = cJSON_Parse(input_str);
@@ -173,14 +177,30 @@ static int adv_info_parse(const char *input_str, struct ble_find_condition *out_
 		strncpy(out_info->character, item->valuestring, sizeof(out_info->character) - 1); 
 		out_info->character[sizeof(out_info->character) - 1] = '\0'; 
 	}
-	if(out_info->mac_len==0 && (out_info->service[0]==0||out_info->character[0]==0))
+	
+	item = cJSON_GetObjectItem(root, "write_value");
+    if (cJSON_IsString(item)) 
+    { 
+		out_info->write_value_len = strlen(item->valuestring)/2;
+		out_info->write_value = user_malloc(out_info->write_value_len);
+		hex_to_uint8(item->valuestring,  out_info->write_value);
+		item = cJSON_GetObjectItem(root, "write_feedback");
+	    if (cJSON_IsNumber(item)) {
+			out_info->write_feedback = item->valueint; 
+		} else {
+ 			out_info->write_feedback=0;
+ 		}
+	}
+	
+	if(out_info->mac_len==0 && out_info->adv_prefix_len==0 && (out_info->service[0]==0||out_info->character[0]==0))
 		success = 0;
 		
     cJSON_Delete(root);
-
+	if(success==0)
+		ESP_LOGW(TAG, "ble_info_parse wrong %s",input_str);
     return success ? 1 : 0;
 }
-static bool adv_info_search(const uint8_t *mac_6bytes, const uint8_t *adv, int adv_len, struct ble_info *info) {
+static bool ble_info_search(const uint8_t *mac_6bytes, const uint8_t *adv, int adv_len, ble_info_t *info) {
     static char mac_temp[13];
     bool ret = false;
     memset(mac_temp,0,sizeof(mac_temp));
@@ -192,8 +212,8 @@ static bool adv_info_search(const uint8_t *mac_6bytes, const uint8_t *adv, int a
 			#if 1
 			if(adv_len>8 && memcmp(adv+5,"DC02",4)==0)
 			{
-				printf("watching device prefix len %d prefix start %d mac %s adv %s \r\n",g_adv_list[i].adv_prefix_len,g_adv_list[i].adv_prefix_start,mac_temp,adv);
-				print_format(NULL,0,"%02x","adv ", "\r\n",adv + g_adv_list[i].adv_prefix_start,g_adv_list[i].adv_prefix_len);
+				printf("watching device prefix len %d prefix start %d mac %s|%s adv %s \r\n",g_adv_list[i].adv_prefix_len,g_adv_list[i].adv_prefix_start,mac_temp,info->mac,adv);
+				print_format(NULL,0,"%02x","adv ", "\r\n",(uint8_t *)adv + g_adv_list[i].adv_prefix_start,g_adv_list[i].adv_prefix_len);
 				print_format(NULL,0,"%02x","info ", "\r\n",g_adv_list[i].adv_prefix_value,g_adv_list[i].adv_prefix_len);
 			} 
 			#endif
@@ -209,7 +229,7 @@ static bool adv_info_search(const uint8_t *mac_6bytes, const uint8_t *adv, int a
 	        }
 	
 	        if (mac_ok > 0 && adv_ok > 0 ) {
-	            memcpy(&info->condition,&g_adv_list[i],sizeof(struct ble_find_condition));
+	            memcpy(&info->condition,&g_adv_list[i],sizeof(ble_find_condition_t));
 	            memcpy(info->mac,mac_temp,12);
 	            ret = true;
 	            break;
@@ -220,16 +240,16 @@ static bool adv_info_search(const uint8_t *mac_6bytes, const uint8_t *adv, int a
     
     return ret;
 }
-static int adv_info_compare(const struct ble_find_condition *a, const struct ble_find_condition *b) {
+static int ble_info_compare(const ble_find_condition_t *a, const ble_find_condition_t *b) {
     if (a == NULL || b == NULL) return 0;
     return a->id == b->id;
 }
-static void adv_info_add(const struct ble_find_condition *new_info) {
+static void ble_info_add(const ble_find_condition_t *new_info) {
     if (new_info == NULL) return;
     if (xSemaphoreTake(g_adv_mutex, portMAX_DELAY) == pdTRUE) {
         int duplicate = 0;
         for (int i = 0; i < g_adv_count; i++) {
-            if (adv_info_compare(&g_adv_list[i], new_info)) {
+            if (ble_info_compare(&g_adv_list[i], new_info)) {
                 duplicate = 1;
                 break;
             }
@@ -241,7 +261,7 @@ static void adv_info_add(const struct ble_find_condition *new_info) {
     }
 }
 
-static int adv_info_remove(int id) {
+static int ble_info_remove(int id) {
     if (xSemaphoreTake(g_adv_mutex, portMAX_DELAY) == pdTRUE) {
         int found = -1;
         for (int i = 0; i < g_adv_count; i++) {
@@ -253,7 +273,7 @@ static int adv_info_remove(int id) {
         if (found >= 0) {
             int num_to_move = g_adv_count - found - 1;
             if (num_to_move > 0) {
-                memcpy(&g_adv_list[found], &g_adv_list[found + 1], num_to_move * sizeof(struct ble_find_condition));
+                memcpy(&g_adv_list[found], &g_adv_list[found + 1], num_to_move * sizeof(ble_find_condition_t));
             }
             g_adv_count--;
         }
@@ -262,36 +282,63 @@ static int adv_info_remove(int id) {
     }
     return -1;
 }
-void blecent_device_read(char *command) {
-	/*
-	topic /dc01/a085e3e66d1c/ble/read
-	*/
-	const char command_json[] = "{"
-	    "\"id\": 3,"
+void blecent_cloud_command(char *command) {
+	if(command==NULL) return;
+	
+	ble_find_condition_t adv = {0};
+	if(ble_info_parse(command, &adv)) {
+		ble_info_add(&adv);
+	}
+	
+#if 0
+	const char command1[] = "{"
+	    "\"id\": 1,"
 	    "\"adv_prefix_start\": 5,"
 	    "\"adv_prefix_value\": \"44433032\"," //DC02
-	    "\"mac\": \"2fa1651de6ff\","
+	    //"\"mac\": \"f6484ba08fde\","
 	    "\"service\": \"fb349b5f-8000-0080-0010-0000fff00000\","
 	    "\"character\": \"fb349b5f-8000-0080-0010-0000fff20000\""
 	"}";
-	struct ble_find_condition adv = {0};
-	if(adv_info_parse(command_json, &adv)) {
-		adv_info_add(&adv);
+	const char command2[] = "{"
+	    "\"id\": 2,"
+	    "\"adv_prefix_start\": 5,"
+	    "\"adv_prefix_value\": \"44433032\"" //DC02
+	"}";
+	const char command3[] = "{"
+	    "\"id\": 3,"
+	    "\"mac\": \"f6484ba08fde\""
+	"}";	
+	ble_find_condition_t adv = {0};
+	memset(&adv,0,sizeof(adv));
+	if(ble_info_parse(command1, &adv)) {
+		ble_info_add(&adv);
 	}
+	memset(&adv,0,sizeof(adv));
+	if(ble_info_parse(command2, &adv)) {
+		ble_info_add(&adv);
+	}
+	memset(&adv,0,sizeof(adv));
+	if(ble_info_parse(command3, &adv)) {
+		ble_info_add(&adv);
+	}	
+#endif
 }
-void blecent_cloud_upload(int id, char *mac, int rssi, uint8_t *bin, int bin_len) {
+void blecent_cloud_upload(ble_info_t *info, uint8_t *bin, int bin_len) {
     cJSON *root = cJSON_CreateObject();
-    cJSON_AddNumberToObject(root, "id", id);
-    cJSON_AddStringToObject(root, "mac", mac ? mac : "");
-    cJSON_AddNumberToObject(root, "rssi", rssi);
+    cJSON_AddNumberToObject(root, "id", info->condition.id);
+    cJSON_AddStringToObject(root, "mac", info->mac);
+    cJSON_AddNumberToObject(root, "rssi", info->rssi);
+    ble_info_remove(info->condition.id);
+    ble_info_free(info);
     char *hex_str = uint8_to_hex(bin, bin_len);
     if (hex_str) {
         cJSON_AddStringToObject(root, "data", hex_str);
         user_free(hex_str); 
     } 
-    char *json_str = cJSON_PrintUnformatted(root); // 紧凑格式，无空格
+    char *json_str = cJSON_PrintUnformatted(root); 
     if (json_str) {
         printf("blecent_cloud_upload %s\n", json_str);
+        mqtt_send(TOPIC_BLE_DTU_UPLOAD,(uint8_t *)json_str,strlen(json_str));
         user_free(json_str);
     }
     cJSON_Delete(root);
@@ -303,50 +350,94 @@ blecent_read_cb(uint16_t conn_handle,
                        void *arg)
 {
     ESP_LOGI(TAG,"Read complete for the subscribable characteristic status=%d conn_handle=%d", error->status, conn_handle);
-    if (error->status == 0) {
+    if (error->status == 0) 
+    {
         ESP_LOGI(TAG, " attr_handle=%d value=", attr->handle);
         //print_mbuf(attr->om);
-        struct ble_info *info=(struct ble_info *)arg;
+        ble_info_t *info=(ble_info_t *)arg;
         uint16_t bin_len = OS_MBUF_PKTLEN(attr->om);
         uint8_t *bin = user_malloc(bin_len);  
 	    os_mbuf_copydata(attr->om, 0, bin_len, bin);
-        blecent_cloud_upload(info->condition.id, info->mac, info->rssi, bin, bin_len);
+        blecent_cloud_upload(info, bin, bin_len);
         user_free(bin);
+        goto RESULT;
     }
+    ble_info_free(arg);
+RESULT:    
     ble_gap_terminate(conn_handle, BLE_ERR_REM_USER_CONN_TERM);
-    user_free(arg);
     return 0;
 }
-static int blecent_read(const struct peer *peer,struct ble_info *info)
+static int blecent_read(const struct peer *peer,ble_info_t *info)
 {
     const struct peer_chr *chr;
     int rc;
-    if(info!=NULL && info->condition.service[0]>0 && info->condition.character[0]>0) 
-    {
-	    ble_uuid128_t service = {0};
-	    str_to_uid128(info->condition.service, &service);
-	    ble_uuid128_t character = {0};
-	    str_to_uid128(info->condition.character, &character);
-	    #if 0
-	    printf("input service %s character %s\r\n",info->condition.service,info->condition.character);
-	    printf("converted service and character\r\n");
-	    print_uuid(&service);
-	    print_uuid(&character);
-	    #endif 
-	    chr = peer_chr_find_uuid(peer, (ble_uuid_t *)&service, (ble_uuid_t *)&character);
-	    if (chr == NULL) {
-	        ESP_LOGE(TAG,"Error: Peer doesn't have the custom subscribable characteristic");
-	        goto err;
-	    }
-	    rc = ble_gattc_read(peer->conn_handle, chr->chr.val_handle, blecent_read_cb, info);
-	    if (rc != 0) {
-	        ESP_LOGE(TAG,"Error: Failed to read the custom subscribable characteristic rc=%d", rc);
-	        goto err;
-	    }
-	}
+
+    ble_uuid128_t service = {0};
+    str_to_uid128(info->condition.service, &service);
+    ble_uuid128_t character = {0};
+    str_to_uid128(info->condition.character, &character);
+    #if 0
+    printf("input service %s character %s\r\n",info->condition.service,info->condition.character);
+    printf("converted service and character\r\n");
+    print_uuid(&service);
+    print_uuid(&character);
+    #endif 
+    chr = peer_chr_find_uuid(peer, (ble_uuid_t *)&service, (ble_uuid_t *)&character);
+    if (chr == NULL) {
+        ESP_LOGE(TAG,"Error: Peer doesn't have the custom subscribable characteristic");
+        goto err;
+    }
+    rc = ble_gattc_read(peer->conn_handle, chr->chr.val_handle, blecent_read_cb, info);
+    if (rc != 0) {
+        ESP_LOGE(TAG,"Error: Failed to read the custom subscribable characteristic rc=%d", rc);
+        goto err;
+    }
+
     return 0;
 err:
-    user_free(info);
+    ble_info_free(info);
+    return ble_gap_terminate(peer->conn_handle, BLE_ERR_REM_USER_CONN_TERM);
+}
+static int blecent_write_cb(uint16_t conn_handle,
+                        const struct ble_gatt_error *error,
+                        struct ble_gatt_attr *attr,
+                        void *arg)
+{	
+	ble_info_t *info = (ble_info_t *)arg;
+	const struct peer *peer;
+	peer = peer_find(conn_handle);
+	
+	if(info->condition.write_feedback>0) 
+	    return blecent_read(peer,info);
+	else {
+		ble_info_remove(info->condition.id);
+		ble_info_free(info);
+    	return ble_gap_terminate(peer->conn_handle, BLE_ERR_REM_USER_CONN_TERM);
+    }
+}
+static int blecent_write(const struct peer* peer,ble_info_t *info)
+{
+	const struct peer_chr *chr;
+    int rc;
+
+    ble_uuid128_t service = {0};
+    str_to_uid128(info->condition.service, &service);
+    ble_uuid128_t character = {0};
+    str_to_uid128(info->condition.character, &character);
+    chr = peer_chr_find_uuid(peer, (ble_uuid_t *)&service, (ble_uuid_t *)&character);
+    if (chr == NULL) {
+        ESP_LOGE(TAG,"Error: Peer doesn't have the custom subscribable characteristic");
+        goto err;
+    }	    
+    rc = ble_gattc_write_flat(peer->conn_handle, chr->chr.val_handle, info->condition.write_value, info->condition.write_value_len, blecent_write_cb, info);
+    if (rc != 0) {
+        ESP_LOGE(TAG,"Error: Failed to read the custom subscribable characteristic rc=%d", rc);
+        goto err;
+    }
+
+    return 0;
+err:
+    ble_info_free(info);
     return ble_gap_terminate(peer->conn_handle, BLE_ERR_REM_USER_CONN_TERM);
 }
 
@@ -359,12 +450,15 @@ blecent_disc_cb(const struct peer *peer, int status, void *arg)
     if (status != 0) {
         /* Service discovery failed.  Terminate the connection. */
         ESP_LOGE(TAG, "Error: Service discovery failed; status=%d conn_handle=%d", status, peer->conn_handle);
-        user_free(arg);
+        ble_info_free(arg);
         ble_gap_terminate(peer->conn_handle, BLE_ERR_REM_USER_CONN_TERM);
         return;
     }
-    
-	blecent_read(peer,(struct ble_info *)arg);
+    ble_info_t *info = (ble_info_t *) arg;
+    if(info->condition.write_value_len>0)
+    	blecent_write(peer,info);
+    else
+		blecent_read(peer,info);
 }
 
 /**
@@ -427,11 +521,17 @@ blecent_gap_event(struct ble_gap_event *event, void *arg)
 	        return 0; 
 	    } 
 	    addr = &((struct ble_gap_disc_desc *)&event->disc)->addr;
-	    struct ble_info *adv_temp = user_malloc(sizeof(struct ble_info));
-		if(adv_info_search(addr->val, event->disc.data, event->disc.length_data, adv_temp))
+	    ble_info_t *adv_temp = user_malloc(sizeof(ble_info_t));
+		if(ble_info_search(addr->val, event->disc.data, event->disc.length_data, adv_temp))
 		{                    
     		printf("Find ble device %d %d %s\r\n",event->disc.event_type,event->disc.length_data,adv_temp->mac);
     		adv_temp->rssi = ((struct ble_gap_disc_desc *)&event->disc)->rssi;
+    		if(adv_temp->condition.service[0]==0 || adv_temp->condition.character[0]==0) //不需要连接，因为没有service id
+    		{
+				blecent_cloud_upload(adv_temp, (uint8_t *)event->disc.data, event->disc.length_data);
+				return 0;
+			}
+    		//需要连接获取service内容
         	if (event->disc.event_type == BLE_HCI_ADV_RPT_EVTYPE_ADV_IND || event->disc.event_type == BLE_HCI_ADV_RPT_EVTYPE_DIR_IND) {
 	   	        if(ble_gap_disc_cancel()==0) {
 			    	if(ble_gap_connect(own_addr_type, addr, 30000, NULL, blecent_gap_event, adv_temp)==0) {
@@ -440,7 +540,7 @@ blecent_gap_event(struct ble_gap_event *event, void *arg)
 				}
 			}
 	    }
-	    user_free(adv_temp);
+	    ble_info_free(adv_temp);
         return 0;
 
     case BLE_GAP_EVENT_LINK_ESTAB:
@@ -451,7 +551,7 @@ blecent_gap_event(struct ble_gap_event *event, void *arg)
             rc = peer_add(event->connect.conn_handle);
             if (rc != 0) {
                 ESP_LOGE(TAG,"Failed to add peer; rc=%d", rc);
-                user_free(arg);
+                ble_info_free(arg);
                 return 0;
             }
 
@@ -476,14 +576,14 @@ blecent_gap_event(struct ble_gap_event *event, void *arg)
             rc = peer_disc_all(event->connect.conn_handle, blecent_disc_cb, arg);
             if(rc != 0) {
                 ESP_LOGE(TAG, "Failed to discover services; rc=%d", rc);
-                user_free(arg);
+                ble_info_free(arg);
                 return 0;
             }
 #endif
         } else {
             /* Connection attempt failed; resume scanning. */
             ESP_LOGE(TAG, "Error: Connection failed; status=%d", event->connect.status);
-            user_free(arg);
+            ble_info_free(arg);
             blecent_scan();
         }
 
@@ -598,7 +698,7 @@ void blecent_init(void)
 {
 	g_adv_mutex = xSemaphoreCreateMutex();
 	
-	blecent_device_read(NULL);
+	blecent_cloud_command(NULL);
 	
     int ret = nimble_port_init();
     if (ret != ESP_OK) {

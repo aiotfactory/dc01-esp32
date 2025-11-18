@@ -1,4 +1,10 @@
 dependencies:
+  comm_core:
+    dependencies: []
+    source:
+      path: D:\esp32\projects\dc01_simple\private_components\comm_core
+      type: local
+    version: '*'
   espressif/cmake_utilities:
     component_hash: 351350613ceafba240b761b4ea991e0f231ac7a9f59a9ee901f751bddc0bb18f
     dependencies:
@@ -120,11 +126,12 @@ dependencies:
       type: local
     version: '*'
 direct_dependencies:
+- comm_core
 - espressif/esp32-camera
 - espressif/json_parser
 - idf
 - iot_usbh_modem
 - nimble_central_utils
-manifest_hash: 3cbb665e402b491afb57c0b07be5fa37da5a3e80202fe1646209a8cfc19d0beb
+manifest_hash: 2f8a73ad27a7544658afa2e852fee9c0696ced1d281d925aad2ee93a13cc7939
 target: esp32s3
 version: 2.0.0

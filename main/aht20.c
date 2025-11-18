@@ -120,7 +120,7 @@ int aht20_upload(void *parameter) {
                  (int *)(temp_buff + 6), temp_buff + 10, 3);
   return tcp_send_command(
       "aht20",
-      data_container_create(1, COMMAND_REQ_AHT20, temp_buff, AHT20_DATA_LEN),
+      data_container_create(1, COMMAND_REQ_AHT20, temp_buff, AHT20_DATA_LEN,NULL),
       NULL, 0, COMMAND_FLAG_FROM_DEVICE | COMMAND_FLAG_INIT_FROM_DEVICE,
       SOCKET_HANDLER_ONE_TIME, 0,NULL);
 }

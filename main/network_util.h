@@ -1,7 +1,10 @@
 #pragma once
 
 
+
+#include "freertos/FreeRTOS.h"
 #include "device_config.h"
+
 
 #ifdef __cplusplus
 extern "C"
@@ -67,6 +70,9 @@ uint8_t module_lock(char *comments,uint32_t module,TickType_t x);
  */
 void module_unlock(char *comments,uint32_t module);
 
+
+
+
 /**
  * 方便把要发送的data和data_len打包成data_send_container。
  * This function conveniently packages the data and data_len to be sent into a data_send_container.
@@ -87,7 +93,7 @@ void module_unlock(char *comments,uint32_t module);
  * data_len is the length of the data.
  */
 
-data_send_container* data_container_create(uint8_t need_free, command_request command, uint8_t *data, uint32_t data_len);
+data_send_container* data_container_create(uint8_t need_free, command_request command, uint8_t *data, uint32_t data_len,socket_recv_callback callback);
 
 /**
  * 将数据添加到现有的data_send_container中。
@@ -170,7 +176,6 @@ int tcp_send_command(char *handler_name, data_send_container *data_container,
  * Return 0 indicates success, a value less than 0 indicates failure.
  */
 int tcp_send_config(char *handler_name, uint8_t *params, uint8_t params_len);               
-
 
 #ifdef __cplusplus
 }

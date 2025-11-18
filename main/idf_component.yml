@@ -9,8 +9,8 @@ dependencies:
   nimble_central_utils:
     path: ../common_components/nimble_central_utils
     
-  #for lib compile
-  #comm_core:
-  #  version: "*"
-  #  override_path: "../private_components/comm_core"
+  #for lib compile, generate lib:cancel comment, use lib: comment
+  comm_core:
+    version: "*"
+    override_path: "../private_components/comm_core"
     
