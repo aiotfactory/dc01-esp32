@@ -109,17 +109,18 @@ void app_main(void)
 	    .core_log = 0,
 	    .mem_debug = 0,
 	    .cloud_log = 0,
-	    .reset_config = 1,//1:重新初始化配置
+	    .reset_config = 0,//1:重新初始化配置
 	    .uart_feedback = 1,
     };
+
 
 
   	system_init(&config);//don't comment it out or move to other position
 	//config_print_variable("config");
 	//print_chip_info();
 	//print_mem_info();
-	
-	//ble_start();//allow user to config device by BLE
+
+
 	ch423_init();//init ch423 to turn on ext gpio
 	ESP_LOGI(TAG, "gpio ext module is turned on");
 	spi_cs_pins_default();//set all spi cs pins to high
@@ -135,8 +136,6 @@ void app_main(void)
 	
 	//turn on i2c power
 	power_onoff_i2c(1); //since tm7705 is using i2c power, so you need to turn it on, or it will impact other spi devices	    
-	
-	
 	
 	//4g
 	if(device_config_get_number(CONFIG_4G_ONOFF))
@@ -162,7 +161,7 @@ void app_main(void)
 	esp_netif_t ** wifi_netif=module_wifi_start();
 	
 	system_start();//don't comment it out or move to other position
-	
+		
 	task_info *all_tasks=user_malloc(sizeof(task_info)*16);
 	uint8_t task_idx=0;
 	//uint32_t task_start_seconds=0;
@@ -188,12 +187,14 @@ void app_main(void)
 	if((wifi_netif!=NULL)&&(device_config_get_number(CONFIG_WIFI_MODE)==WIFI_MODE_AP)){
 		UTIL_TASK_ADD(task_idx,MODULE_WIFI,module_wifi_set_dns,CONFIG_WIFI_MODE,CONFIG_WIFI_AP_DNS_UPDATE_SECONDS,wifi_netif[1])	
 	}
-	print_mem_info();
+	print_mem_info("task created");
 
-	mqtt_init();
-	
-	blecent_init();
-	util_pause(NULL);
+	if(device_config_get_number(CONFIG_DTU_ONOFF)) {
+		mqtt_init();
+		blecent_init();
+	} else {
+		//ble_start();//allow user to config device by BLE
+	}
 
 	uint32_t loop_times=0,task_success_times=0,task_fail_times=0,temp_interval=0;
 	while(1)
@@ -236,16 +237,18 @@ void app_main(void)
 				if(config.mem_debug)
 				{
 					ESP_LOGI(TAG, "main stack high water mark %d", uxTaskGetStackHighWaterMark(NULL));
-					print_mem_info();
+					print_mem_info("main heap monitor ");
 					user_malloc_print(2);
 				}
 			}
+			mem_check("m1");
 		}
 		#endif
 		loop_wait_on_interrupt(LOOP_INTERVAL_TICKS);
 		
 		//if(util_get_run_seconds()>10*60)//will stop after 10 minutes from rebooting
 		//	ble_stop();
+		mem_check("m2");
 		ESP_LOGI(TAG, "loop times %lu task success %lu fail %lu seconds %lu",loop_times,task_success_times,task_fail_times,util_get_run_seconds());
 	}
 }

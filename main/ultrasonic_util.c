@@ -79,7 +79,7 @@ void ultrasonic_queue(void)
 	
 	if(ultrasonic_queue_v==NULL)
 		return;
-	if(xQueueReceive(ultrasonic_queue_v, &temp_value,0)) 
+	if(xQueueReceive(ultrasonic_queue_v, &temp_value,pdMS_TO_TICKS(50))) 
 	{
 		distance=343.65;//20摄氏度建议值
 		if(config_compensation_mode>0)
@@ -213,7 +213,7 @@ static uint8_t *ultrasonic_exe(uint8_t type,int *data_len)
 	if(type!=2)//no need for trigger
 	{
 		ultrasonic_queue();
-		for(int i=0;i<30;i++)
+		for(int i=0;i<3;i++)
 		{
 			util_delay_ms(20);
 			ultrasonic_queue();

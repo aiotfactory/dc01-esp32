@@ -94,15 +94,19 @@ void timer_util_start(esp_timer_handle_t *timer,uint32_t milliseconds);
 void util_gpio_init(uint8_t pin,gpio_mode_t mode,gpio_pulldown_t pulldownmode,gpio_pullup_t pullupmode,uint8_t value);
 uint32_t util_get_timestamp(void);
 
-
 uint8_t util_crc_calc(uint8_t *data, uint8_t data_num,uint32_t polynomial);
-void print_mem_info(void);
+void print_mem_info(char *prefix);
 int print_format(char *dst,uint32_t dst_len,char *format,char *prefix, char *suffix,uint8_t *data,uint32_t data_len);
 void print_chip_info(void);
 void property_value_add(uint8_t *data_out,int *data_out_len,char *property_name,uint8_t property_name_len,uint8_t property_flag,uint16_t property_value_len,uint8_t *property_value);
 uint8_t *byte_search(uint8_t *data, uint32_t data_len,uint8_t target,uint32_t index);
-void mem_check(char *prefix);
+
+//#define mem_check(prefix) mem_check_exe(prefix)
+#define mem_check(prefix) ((void)0)
+void mem_check_exe(char *prefix);
+
 void led_flash(uint32_t time_ms);
+void util_hex_to_bytes(const char* hex_str, uint8_t* out);
 
 extern QueueHandle_t gpio_evt_queue;
 extern EventGroupHandle_t app_evt_group_hdl;

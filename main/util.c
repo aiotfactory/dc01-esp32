@@ -46,12 +46,12 @@ void ddl_memclr(void *pu8Address, uint32_t u32Count)
         *pu8Addr++ = 0;
     }
 }
-void print_mem_info(void)
+void print_mem_info(char *prefix)
 {
 	//ESP_LOGI(TAG,"Free heap size: %" PRIu32 " bytes", esp_get_free_heap_size());
 	//ESP_LOGI(TAG,"Free internal heap size: %" PRIu32 " bytes", esp_get_free_internal_heap_size());
     //ESP_LOGI(TAG,"Minimum free heap size: %" PRIu32 " bytes", esp_get_minimum_free_heap_size());
-   ESP_LOGI(TAG, "Free heap=%d|%d|%d Free mini=%d|%d|%d Bigst=%d|%d|%d|%d",
+   ESP_LOGW(TAG, "%sFree heap=%d|%d|%d Free mini=%d|%d|%d Bigst=%d|%d|%d|%d",prefix,
              heap_caps_get_free_size(MALLOC_CAP_DEFAULT),
              heap_caps_get_free_size(MALLOC_CAP_SPIRAM),
              heap_caps_get_free_size(MALLOC_CAP_INTERNAL),
@@ -272,11 +272,12 @@ void property_value_add(uint8_t *data_out,int *data_out_len,char *property_name,
 	}
 	*data_out_len=idx;
 }
-void mem_check(char *prefix)
+void mem_check_exe(char *prefix)
 {
 	if(prefix!=NULL)
 		ESP_LOGI(TAG,"%s",prefix);
 	heap_caps_check_integrity_all(true);
+	ESP_LOGI(prefix,"stack high water mark %d", uxTaskGetStackHighWaterMark(NULL));
 }
 static esp_timer_handle_t oneshot_timer=NULL;
 static void led_flash_callback(void* arg)
@@ -296,5 +297,11 @@ void led_flash(uint32_t time_ms)
 	    };
 	    ESP_ERROR_CHECK(esp_timer_create(&oneshot_timer_args, &oneshot_timer));
 	    ESP_ERROR_CHECK(esp_timer_start_once(oneshot_timer, time_ms*1000));
+    }
+}
+void util_hex_to_bytes(const char* hex_str, uint8_t* out) {
+    size_t len = strlen(hex_str);
+      for (size_t i = 0; i < len; i += 2) {
+        sscanf(hex_str + i, "%2hhx", &out[i / 2]);
     }
 }

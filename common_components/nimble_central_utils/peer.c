@@ -341,8 +341,8 @@ peer_chr_add(struct peer *peer,  uint16_t svc_start_handle,
         return BLE_HS_ENOMEM;
     }
     memset(chr, 0, sizeof * chr);
-	printf("character uuid ");
-	print_uuid(&gatt_chr->uuid);
+	//printf("character uuid ");
+	//print_uuid(&gatt_chr->uuid);
     chr->chr = *gatt_chr;
 
     if (prev == NULL) {
@@ -558,8 +558,8 @@ peer_svc_add(struct peer *peer, const struct ble_gatt_svc *gatt_svc)
         return BLE_HS_ENOMEM;
     }
     memset(svc, 0, sizeof * svc);
-	printf("service uuid ");
-	print_uuid(&gatt_svc->uuid);
+	//printf("service uuid ");
+	//print_uuid(&gatt_svc->uuid);
     svc->svc = *gatt_svc;
     SLIST_INIT(&svc->chrs);
 

@@ -43,19 +43,6 @@ typedef struct mqtt_data_upload {
 
 static const char *TAG = "mqtts_util";
 
-/*
- * Define psk key and hint as defined in mqtt broker
- * example for mosquitto server, content of psk_file:
- * hint:BAD123
- *
- */
-static const uint8_t s_key[] = { 0xBA, 0xD1, 0x23 };
-
-static const psk_hint_key_t psk_hint_key = {
-        .key = s_key,
-        .key_size = sizeof(s_key),
-        .hint = "hint"
-        };
 static esp_mqtt_client_handle_t mqtt_client = NULL;        
 static QueueHandle_t        g_queue_mqtt_upload  = NULL;
 static bool connected = false;
@@ -83,14 +70,13 @@ static void mqtt_data_free(mqtt_data_upload_t *data) {
  */
 static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data)
 {
-    ESP_LOGD(TAG, "Event dispatched from event loop base=%s, event_id=%" PRIi32 "", base, event_id);
     esp_mqtt_event_handle_t event = event_data;
     esp_mqtt_client_handle_t client = event->client;
     int msg_id;
     switch ((esp_mqtt_event_id_t)event_id) {
         case MQTT_EVENT_CONNECTED:
         	connected = true;
-            ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
+          
 			char *topic_temp = user_malloc(strlen(TOPIC_BLE_DTU_COMMAND)+32);
 			sprintf(topic_temp,"/dc01/%02x%02x%02x%02x%02x%02x/%s",rt_device_mac[0],rt_device_mac[1],rt_device_mac[2],rt_device_mac[3],rt_device_mac[4],rt_device_mac[5],TOPIC_BLE_DTU_COMMAND);
             msg_id = esp_mqtt_client_subscribe(client, topic_temp, 0);
@@ -101,32 +87,32 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
             break;
         case MQTT_EVENT_DISCONNECTED:
         	connected = false;
-            ESP_LOGE(TAG, "MQTT_EVENT_DISCONNECTED");
+            ESP_LOGE(TAG, "mqtt_event_handler disconn");
             break;
 
         case MQTT_EVENT_SUBSCRIBED:
-            ESP_LOGI(TAG, "MQTT_EVENT_SUBSCRIBED, msg_id=%d", event->msg_id);
+            //ESP_LOGI(TAG, "MQTT_EVENT_SUBSCRIBED, msg_id=%d", event->msg_id);
             //msg_id = esp_mqtt_client_publish(client, "/topic/qos0", "data", 0, 0, 0);
             //ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
             break;
         case MQTT_EVENT_UNSUBSCRIBED:
-            ESP_LOGI(TAG, "MQTT_EVENT_UNSUBSCRIBED, msg_id=%d", event->msg_id);
+            //ESP_LOGI(TAG, "MQTT_EVENT_UNSUBSCRIBED, msg_id=%d", event->msg_id);
             break;
         case MQTT_EVENT_PUBLISHED:
-            ESP_LOGI(TAG, "MQTT_EVENT_PUBLISHED, msg_id=%d", event->msg_id);
+            //ESP_LOGI(TAG, "MQTT_EVENT_PUBLISHED, msg_id=%d", event->msg_id);
             break;
         case MQTT_EVENT_DATA:
             //ESP_LOGI(TAG, "MQTT_EVENT_DATA");
-            printf("recv topic %.*s data len %d\r\n", event->topic_len, event->topic,event->data_len);
-            print_format(NULL,0,"%02x","recv data ", "\r\n",(uint8_t *)event->data,event->data_len);
-            printf("recv data %.*s\r\n", event->data_len, event->data);
+            //printf("recv topic %.*s data len %d\r\n", event->topic_len, event->topic,event->data_len);
+            //print_format(NULL,0,"%02x","recv data ", "\r\n",(uint8_t *)event->data,event->data_len);
+            //printf("recv data %.*s\r\n", event->data_len, event->data);
             blecent_cloud_command(event->data);
             break;
         case MQTT_EVENT_ERROR:
-            ESP_LOGE(TAG, "MQTT_EVENT_ERROR");
+            ESP_LOGE(TAG, "mqtt_event_handler error");
             break;
         default:
-            ESP_LOGE(TAG, "Other event id:%d", event->event_id);
+            ESP_LOGI(TAG, "mqtt_event_handler other event id:%d", event->event_id);
             break;
     }
 }
@@ -169,20 +155,41 @@ static void mqtt_task(void *pvParameters)
 }
 
 void mqtt_init(void)
-{
-    const esp_mqtt_client_config_t mqtt_cfg = {
-        .broker.address.uri = "mqtts://139.196.107.200",
-        .broker.address.port = 1883,
-        .broker.verification.psk_hint_key = &psk_hint_key,
-        .credentials.username = "user",
-        .credentials.authentication.password ="quitto12vers"
-    };
+{	
+	char *mqtt_url=(char *)user_malloc(50);
+	device_config_get_string(CONFIG_DTU_MQTT_URL,mqtt_url, 0);
+	uint32_t mqtt_port = device_config_get_number(CONFIG_DTU_MQTT_PORT);
+	char *mqtt_user=(char *)user_malloc(50);
+	device_config_get_string(CONFIG_DTU_MQTT_USER,mqtt_user, 0);	
+	char *mqtt_password=(char *)user_malloc(50);
+	device_config_get_string(CONFIG_DTU_MQTT_PASSWORD,mqtt_password, 0);	
+	char *mqtt_hint_name=(char *)user_malloc(50);
+	device_config_get_string(CONFIG_DTU_MQTT_HINT_NAME,mqtt_hint_name, 0);	
+	char *mqtt_hint_key=(char *)user_malloc(50);
+	device_config_get_string(CONFIG_DTU_MQTT_HINT_HEX_KEY,mqtt_hint_key, 0);	
+    uint8_t *mqtt_hint_key_bytes=(uint8_t *)user_malloc(50);
+    util_hex_to_bytes((const char *)mqtt_hint_key, mqtt_hint_key_bytes);
+    
 
+	static psk_hint_key_t psk_hint_key = {0};
+	psk_hint_key.key = mqtt_hint_key_bytes;
+	size_t key_size = strlen(mqtt_hint_key)/2;
+	memcpy((uint8_t *)&psk_hint_key.key_size,&key_size,sizeof(key_size));
+	psk_hint_key.hint = mqtt_hint_name;
+
+            
+    const esp_mqtt_client_config_t mqtt_cfg = {
+        .broker.address.uri = mqtt_url,
+        .broker.address.port = mqtt_port,
+        .broker.verification.psk_hint_key = &psk_hint_key,
+        .credentials.username = mqtt_user,
+        .credentials.authentication.password = mqtt_password
+    };
+    
     mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
-    /* The last argument may be used to pass data to the event handler, in this example mqtt_event_handler */
+        
     esp_mqtt_client_register_event(mqtt_client, ESP_EVENT_ANY_ID, mqtt_event_handler, NULL);
     esp_mqtt_client_start(mqtt_client);
-    //print_mem_info();
     g_queue_mqtt_upload = xQueueCreate(10, sizeof(mqtt_data_upload_t *));
     
 	xTaskCreate(&mqtt_task, "mqtt_task", 10*1024, NULL, 9, NULL);
