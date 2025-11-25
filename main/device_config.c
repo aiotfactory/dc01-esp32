@@ -154,6 +154,6 @@ void define_user_config(void)
     define_string_variable(MODULE_DTU,CONFIG_DTU_MQTT_PASSWORD,"dtu_mqtt_password","quitto12vers",50,CONFIG_FLAG_REBOOT,CONFIG_STRING_NORMAL,0,49);
 	define_string_variable(MODULE_DTU,CONFIG_DTU_MQTT_HINT_NAME,"dtu_mqtt_hint_name","hint",50,CONFIG_FLAG_REBOOT,CONFIG_STRING_NORMAL,0,49);
 	define_string_variable(MODULE_DTU,CONFIG_DTU_MQTT_HINT_HEX_KEY,"dtu_mqtt_hint_hex_key","BAD123",50,CONFIG_FLAG_REBOOT,CONFIG_STRING_NORMAL,0,49);
-
+	define_number_variable(MODULE_DTU,CONFIG_DTU_MQTT_HEARTBEAT_SECONDS,"dtu_mqtt_heartbeat",300,sizeof(uint32_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,10,0xffffffff);
 #endif
 }

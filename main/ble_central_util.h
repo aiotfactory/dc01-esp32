@@ -30,7 +30,7 @@ extern "C" {
 
 void blecent_init(void);
 void blecent_cloud_command(char *command);
-
+void blecent_cloud_upload_status(size_t status,char *msg);
 
 #ifdef __cplusplus
 }

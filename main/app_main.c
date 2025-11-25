@@ -250,6 +250,11 @@ void app_main(void)
 		//	ble_stop();
 		mem_check("m2");
 		ESP_LOGI(TAG, "loop times %lu task success %lu fail %lu seconds %lu",loop_times,task_success_times,task_fail_times,util_get_run_seconds());
+	/*
+	todo:
+	1. 蓝牙命令如何清除
+	
+	*/
 	}
 }
 

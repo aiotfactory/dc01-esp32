@@ -30,6 +30,7 @@
 #include "util.h"
 #include "system_util.h"
 #include "mqtt_util.h"
+#include <stddef.h>
 
 typedef struct ble_find_condition {
     int id;
@@ -43,6 +44,11 @@ typedef struct ble_find_condition {
    	uint8_t *write_value;
    	int write_value_len;
    	uint8_t write_feedback;
+   	uint32_t upload_times;
+   	uint32_t upload_interval;
+   	uint32_t upload_actual_times;
+   	uint32_t upload_actual_time;
+   	uint8_t flag;//0 添加,1 删除
 } ble_find_condition_t;
 
 
@@ -63,6 +69,8 @@ static SemaphoreHandle_t g_adv_mutex = NULL;
 static int blecent_gap_event(struct ble_gap_event *event, void *arg);
 static int blecent_read(const struct peer *peer,ble_info_t *info);
 static void blecent_scan(void);
+void blecent_cloud_upload_status(size_t status,char *msg);
+
 
 void ble_store_config_init(void);
 
@@ -118,7 +126,6 @@ static char *uint8_to_hex(const uint8_t *bin, int bin_len) {
     }
     return hex;
 }
-
 static void ble_info_free(ble_info_t *info)
 {
 	if(info!=NULL)
@@ -128,7 +135,8 @@ static void ble_info_free(ble_info_t *info)
 		user_free(info);
 	}
 }
-static int ble_info_parse(const char *input_str, ble_find_condition_t *out_info) {
+static int ble_info_parse(const char *input_str, ble_find_condition_t *out_info) 
+{
     if (out_info == NULL || input_str == NULL) return 0;
 
     cJSON *root = cJSON_Parse(input_str);
@@ -141,6 +149,25 @@ static int ble_info_parse(const char *input_str, ble_find_condition_t *out_info)
     item = cJSON_GetObjectItem(root, "id");
     if (!cJSON_IsNumber(item)) { success = 0; } else { out_info->id = item->valueint; }
 
+	item = cJSON_GetObjectItem(root, "flag");
+	if (cJSON_IsNumber(item)) {
+		out_info->flag = item->valueint;
+	} 
+	
+	item = cJSON_GetObjectItem(root, "upload_times");
+	if (cJSON_IsNumber(item)) 
+	{
+		if(item->valueint > 1) 
+		{
+			out_info->upload_times = item->valueint;
+			item = cJSON_GetObjectItem(root, "upload_interval");
+			if (cJSON_IsNumber(item))
+				out_info->upload_interval = item->valueint;
+			if(out_info->upload_interval==0)
+				out_info->upload_interval = 10;
+		}
+	} 
+	
 	item = cJSON_GetObjectItem(root, "adv_prefix_value");
     if (cJSON_IsString(item)) 
     { 
@@ -192,13 +219,23 @@ static int ble_info_parse(const char *input_str, ble_find_condition_t *out_info)
  		}
 	}
 	
-	if(out_info->mac_len==0 && out_info->adv_prefix_len==0 && (out_info->service[0]==0||out_info->character[0]==0))
+	if(out_info->flag==0 && out_info->mac_len==0 && out_info->adv_prefix_len==0 && (out_info->service[0]==0||out_info->character[0]==0)) {
 		success = 0;
+		if(out_info->write_value!=NULL)
+			user_free(out_info->write_value);
+	}
 		
     cJSON_Delete(root);
 	if(success==0)
 		ESP_LOGW(TAG, "ble_info_parse wrong %s",input_str);
     return success ? 1 : 0;
+}
+//efecfd
+static bool is_ble_test(ble_find_condition_t condition)
+{
+	if(condition.adv_prefix_len >=3 && condition.adv_prefix_value[0]==0xef && condition.adv_prefix_value[1]==0xec && condition.adv_prefix_value[2]==0xfd)
+		return true;
+	return false;
 }
 static bool ble_info_search(const uint8_t *mac_6bytes, const uint8_t *adv, int adv_len, ble_info_t *info) {
     static char mac_temp[13];
@@ -209,7 +246,7 @@ static bool ble_info_search(const uint8_t *mac_6bytes, const uint8_t *adv, int a
     {
 	    for (int i = 0; i < g_adv_count; i++) 
 	    {
-			#if 1
+			#if 0
 			if(adv_len>8 && memcmp(adv+5,"DC02",4)==0)
 			{
 				printf("watching device prefix len %d prefix start %d mac %s|%s adv %s \r\n",g_adv_list[i].adv_prefix_len,g_adv_list[i].adv_prefix_start,mac_temp,info->mac,adv);
@@ -225,12 +262,23 @@ static bool ble_info_search(const uint8_t *mac_6bytes, const uint8_t *adv, int a
 	        } else {
 	            if (g_adv_list[i].adv_prefix_len + g_adv_list[i].adv_prefix_start <= adv_len) {
 	                adv_ok = (memcmp(g_adv_list[i].adv_prefix_value, adv + g_adv_list[i].adv_prefix_start, g_adv_list[i].adv_prefix_len) == 0);
+	                if(adv_ok ==0 && is_ble_test(g_adv_list[i]))
+	                	adv_ok = 1;
 	            }
 	        }
 	
-	        if (mac_ok > 0 && adv_ok > 0 ) {
+			bool time_ok = g_adv_list[i].upload_times == 0 || g_adv_list[i].upload_actual_times==0 || (g_adv_list[i].upload_actual_time + g_adv_list[i].upload_interval) < util_get_run_seconds();
+	        if (mac_ok > 0 && adv_ok > 0  && time_ok) 
+	        {
 	            memcpy(&info->condition,&g_adv_list[i],sizeof(ble_find_condition_t));
+	            if(info->condition.write_value_len>0 && info->condition.write_value!=NULL)
+	            {
+					info->condition.write_value = user_malloc(info->condition.write_value_len);
+					memcpy(info->condition.write_value,g_adv_list[i].write_value,info->condition.write_value_len);
+				}
 	            memcpy(info->mac,mac_temp,12);
+	            g_adv_list[i].upload_actual_times=g_adv_list[i].upload_actual_times+1;
+	            g_adv_list[i].upload_actual_time=util_get_run_seconds();
 	            ret = true;
 	            break;
 	        }
@@ -246,21 +294,50 @@ static int ble_info_compare(const ble_find_condition_t *a, const ble_find_condit
 }
 static void ble_info_add(const ble_find_condition_t *new_info) {
     if (new_info == NULL) return;
-    if (xSemaphoreTake(g_adv_mutex, portMAX_DELAY) == pdTRUE) {
+    if (xSemaphoreTake(g_adv_mutex, portMAX_DELAY) == pdTRUE) 
+    {
         int duplicate = 0;
-        for (int i = 0; i < g_adv_count; i++) {
-            if (ble_info_compare(&g_adv_list[i], new_info)) {
-                duplicate = 1;
+        for (int i = 0; i < g_adv_count; i++) 
+        {
+            if (ble_info_compare(&g_adv_list[i], new_info)) 
+            {
+				if(new_info->flag==1) //删除
+				{
+					if(g_adv_list[i].write_value!=NULL)
+						user_free(g_adv_list[i].write_value);
+		            int num_to_move = g_adv_count -  - 1;
+		            if (num_to_move > 0) {
+		                memcpy(&g_adv_list[i], &g_adv_list[i + 1], num_to_move * sizeof(ble_find_condition_t));
+		            }
+		            g_adv_count--;
+		            duplicate = 2;
+				} else {
+					memcpy(&g_adv_list[i],new_info,sizeof(ble_find_condition_t));
+                	duplicate = 1;
+                }
                 break;
             }
         }
-        if (!duplicate && g_adv_count < MAX_ADV_INFOS) {
+        if (duplicate ==0 && g_adv_count < MAX_ADV_INFOS) {
             g_adv_list[g_adv_count++] = *new_info;
         }
         xSemaphoreGive(g_adv_mutex);
     }
+    
+    if(new_info->flag==1 && new_info->write_value!=NULL) //删除
+    	user_free(new_info->write_value);
 }
-
+static void ble_info_summary(cJSON *id_array) 
+{
+    if (xSemaphoreTake(g_adv_mutex, portMAX_DELAY) == pdTRUE) 
+    {
+        for (int i = 0; i < g_adv_count; i++) 
+        {
+			cJSON_AddItemToArray(id_array, cJSON_CreateNumber(g_adv_list[i].id ));
+        }
+        xSemaphoreGive(g_adv_mutex);
+    }
+}
 static int ble_info_remove(int id) {
     if (xSemaphoreTake(g_adv_mutex, portMAX_DELAY) == pdTRUE) {
         int found = -1;
@@ -270,12 +347,18 @@ static int ble_info_remove(int id) {
                 break;
             }
         }
-        if (found >= 0) {
-            int num_to_move = g_adv_count - found - 1;
-            if (num_to_move > 0) {
-                memcpy(&g_adv_list[found], &g_adv_list[found + 1], num_to_move * sizeof(ble_find_condition_t));
-            }
-            g_adv_count--;
+        if (found >= 0) 
+        {
+			if (g_adv_list[found].upload_times==0 || g_adv_list[found].upload_actual_times>=g_adv_list[found].upload_times)
+			{
+	            int num_to_move = g_adv_count - found - 1;
+	            if(g_adv_list[found].write_value!=NULL)
+	            	user_free(g_adv_list[found].write_value);
+	            if (num_to_move > 0) {
+	                memcpy(&g_adv_list[found], &g_adv_list[found + 1], num_to_move * sizeof(ble_find_condition_t));
+	            }
+	            g_adv_count--;
+	        }
         }
         xSemaphoreGive(g_adv_mutex);
         return found >= 0 ? 0 : -1;
@@ -286,49 +369,26 @@ void blecent_cloud_command(char *command) {
 	if(command==NULL) return;
 	
 	ble_find_condition_t adv = {0};
-	if(ble_info_parse(command, &adv)) {
+	if(ble_info_parse(command, &adv)) 
+	{
 		ble_info_add(&adv);
+		blecent_cloud_upload_status(4,"command confirm");
 	}
-	
-#if 0
-	const char command1[] = "{"
-	    "\"id\": 1,"
-	    "\"adv_prefix_start\": 5,"
-	    "\"adv_prefix_value\": \"44433032\"," //DC02
-	    //"\"mac\": \"f6484ba08fde\","
-	    "\"service\": \"fb349b5f-8000-0080-0010-0000fff00000\","
-	    "\"character\": \"fb349b5f-8000-0080-0010-0000fff20000\""
-	"}";
-	const char command2[] = "{"
-	    "\"id\": 2,"
-	    "\"adv_prefix_start\": 5,"
-	    "\"adv_prefix_value\": \"44433032\"" //DC02
-	"}";
-	const char command3[] = "{"
-	    "\"id\": 3,"
-	    "\"mac\": \"f6484ba08fde\""
-	"}";	
-	ble_find_condition_t adv = {0};
-	memset(&adv,0,sizeof(adv));
-	if(ble_info_parse(command1, &adv)) {
-		ble_info_add(&adv);
-	}
-	memset(&adv,0,sizeof(adv));
-	if(ble_info_parse(command2, &adv)) {
-		ble_info_add(&adv);
-	}
-	memset(&adv,0,sizeof(adv));
-	if(ble_info_parse(command3, &adv)) {
-		ble_info_add(&adv);
-	}	
-#endif
 }
-void blecent_cloud_upload(ble_info_t *info, uint8_t *bin, int bin_len) {
+void blecent_cloud_upload_data(ble_info_t *info, uint8_t *bin, int bin_len) {
     cJSON *root = cJSON_CreateObject();
+    cJSON_AddNumberToObject(root, "time", util_get_run_seconds());
+    cJSON_AddNumberToObject(root, "type", 0);
     cJSON_AddNumberToObject(root, "id", info->condition.id);
     cJSON_AddStringToObject(root, "mac", info->mac);
     cJSON_AddNumberToObject(root, "rssi", info->rssi);
+    
     ble_info_remove(info->condition.id);
+    
+    cJSON *id_array = cJSON_CreateArray();
+    ble_info_summary(id_array);
+    cJSON_AddItemToObject(root, "commands", id_array);
+    
     ble_info_free(info);
     char *hex_str = uint8_to_hex(bin, bin_len);
     if (hex_str) {
@@ -337,7 +397,26 @@ void blecent_cloud_upload(ble_info_t *info, uint8_t *bin, int bin_len) {
     } 
     char *json_str = cJSON_PrintUnformatted(root); 
     if (json_str) {
-        printf("blecent_cloud_upload %s\n", json_str);
+        printf("blecent_cloud_upload_data %s\n", json_str);
+        mqtt_send(TOPIC_BLE_DTU_UPLOAD,(uint8_t *)json_str,strlen(json_str));
+        user_free(json_str);
+    }
+    cJSON_Delete(root);
+}
+void blecent_cloud_upload_status(size_t status,char *msg) {
+	if(status<=0 || msg==NULL) return;
+	
+    cJSON *root = cJSON_CreateObject();
+    cJSON_AddNumberToObject(root, "time", util_get_run_seconds());
+    cJSON_AddNumberToObject(root, "type", status);
+    cJSON_AddStringToObject(root, "msg", msg);
+    cJSON *id_array = cJSON_CreateArray();
+    ble_info_summary(id_array);
+    cJSON_AddItemToObject(root, "commands", id_array);
+    
+    char *json_str = cJSON_PrintUnformatted(root); 
+    if (json_str) {
+        printf("blecent_cloud_upload_status %s\n", json_str);
         mqtt_send(TOPIC_BLE_DTU_UPLOAD,(uint8_t *)json_str,strlen(json_str));
         user_free(json_str);
     }
@@ -358,7 +437,7 @@ blecent_read_cb(uint16_t conn_handle,
         uint16_t bin_len = OS_MBUF_PKTLEN(attr->om);
         uint8_t *bin = user_malloc(bin_len);  
 	    os_mbuf_copydata(attr->om, 0, bin_len, bin);
-        blecent_cloud_upload(info, bin, bin_len);
+        blecent_cloud_upload_data(info, bin, bin_len);
         user_free(bin);
         goto RESULT;
     }
@@ -495,8 +574,7 @@ blecent_scan(void)
     disc_params.filter_policy = 0;
     disc_params.limited = 0;
 
-    rc = ble_gap_disc(own_addr_type, BLE_HS_FOREVER, &disc_params,
-                      blecent_gap_event, NULL);
+    rc = ble_gap_disc(own_addr_type, BLE_HS_FOREVER, &disc_params, blecent_gap_event, NULL);
     if (rc != 0) {
         ESP_LOGE(TAG, "Error initiating GAP discovery procedure; rc=%d\n",
                     rc);
@@ -528,7 +606,7 @@ blecent_gap_event(struct ble_gap_event *event, void *arg)
     		adv_temp->rssi = ((struct ble_gap_disc_desc *)&event->disc)->rssi;
     		if(adv_temp->condition.service[0]==0 || adv_temp->condition.character[0]==0) //不需要连接，因为没有service id
     		{
-				blecent_cloud_upload(adv_temp, (uint8_t *)event->disc.data, event->disc.length_data);
+				blecent_cloud_upload_data(adv_temp, (uint8_t *)event->disc.data, event->disc.length_data);
 				return 0;
 			}
     		//需要连接获取service内容
