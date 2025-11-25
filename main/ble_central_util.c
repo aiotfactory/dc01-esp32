@@ -59,7 +59,7 @@ typedef struct ble_info {
 } ble_info_t;
 
 static const char *TAG = "ble_central_util";
-#define MAX_ADV_INFOS 50
+#define MAX_ADV_INFOS 60
 static ble_find_condition_t g_adv_list[MAX_ADV_INFOS];
 static int g_adv_count = 0;
 static SemaphoreHandle_t g_adv_mutex = NULL;
@@ -318,7 +318,7 @@ static void ble_info_add(const ble_find_condition_t *new_info) {
                 break;
             }
         }
-        if (duplicate ==0 && g_adv_count < MAX_ADV_INFOS) {
+        if (duplicate ==0 && new_info->flag!=1 && g_adv_count < MAX_ADV_INFOS) {
             g_adv_list[g_adv_count++] = *new_info;
         }
         xSemaphoreGive(g_adv_mutex);
