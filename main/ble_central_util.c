@@ -135,13 +135,8 @@ static void ble_info_free(ble_info_t *info)
 		user_free(info);
 	}
 }
-static int ble_info_parse(const char *input_str, ble_find_condition_t *out_info) 
+static int ble_info_parse(cJSON *root, ble_find_condition_t *out_info) 
 {
-    if (out_info == NULL || input_str == NULL) return 0;
-
-    cJSON *root = cJSON_Parse(input_str);
-    if (root == NULL) return 0;
-
     int success = 1;
 
     cJSON *item;
@@ -224,16 +219,16 @@ static int ble_info_parse(const char *input_str, ble_find_condition_t *out_info)
 		if(out_info->write_value!=NULL)
 			user_free(out_info->write_value);
 	}
-		
-    cJSON_Delete(root);
 	if(success==0)
-		ESP_LOGW(TAG, "ble_info_parse wrong %s",input_str);
+		ESP_LOGW(TAG, "ble_info_parse wrong content");
     return success ? 1 : 0;
 }
 //efecfd
 static bool is_ble_test(ble_find_condition_t condition)
 {
-	if(condition.adv_prefix_len >=3 && condition.adv_prefix_value[0]==0xef && condition.adv_prefix_value[1]==0xec && condition.adv_prefix_value[2]==0xfd)
+	//if(condition.adv_prefix_len >=3 && condition.adv_prefix_value[0]==0xef && condition.adv_prefix_value[1]==0xec && condition.adv_prefix_value[2]==0xfd)
+	//	return true;
+	if(condition.flag==2)
 		return true;
 	return false;
 }
@@ -294,6 +289,7 @@ static int ble_info_compare(const ble_find_condition_t *a, const ble_find_condit
 }
 static void ble_info_add(const ble_find_condition_t *new_info) {
     if (new_info == NULL) return;
+    
     if (xSemaphoreTake(g_adv_mutex, portMAX_DELAY) == pdTRUE) 
     {
         int duplicate = 0;
@@ -366,14 +362,46 @@ static int ble_info_remove(int id) {
     return -1;
 }
 void blecent_cloud_command(char *command) {
-	if(command==NULL) return;
-	
-	ble_find_condition_t adv = {0};
-	if(ble_info_parse(command, &adv)) 
-	{
-		ble_info_add(&adv);
-		blecent_cloud_upload_status(4,"command confirm");
-	}
+    if (command == NULL) return;
+
+    cJSON *root = cJSON_Parse(command);
+    if (root == NULL) {
+        ESP_LOGE(TAG, "blecent_cloud_command failed to parse command JSON");
+        return;
+    }
+
+    int processed_count = 0;
+
+    if (cJSON_IsObject(root)) {
+        ble_find_condition_t adv = {0};
+        if (ble_info_parse(root, &adv)) {
+            ble_info_add(&adv);
+            processed_count++;
+        }
+    } else if (cJSON_IsArray(root)) {
+        int size = cJSON_GetArraySize(root);
+        for (int i = 0; i < size; i++) {
+            cJSON *item = cJSON_GetArrayItem(root, i);
+            if (item && cJSON_IsObject(item)) {
+                ble_find_condition_t adv = {0};
+                if (ble_info_parse(item, &adv)) {
+                    ble_info_add(&adv);
+                    processed_count++;
+                }
+            }
+        }
+    }
+    else {
+        ESP_LOGW(TAG, "blecent_cloud_command invalid command format: not an object or array");
+    }
+
+    cJSON_Delete(root);
+
+    if (processed_count > 0) {
+        blecent_cloud_upload_status(4, "command confirm");
+    } else {
+        blecent_cloud_upload_status(5, "command parse failed");
+    }
 }
 void blecent_cloud_upload_data(ble_info_t *info, uint8_t *bin, int bin_len) {
     cJSON *root = cJSON_CreateObject();

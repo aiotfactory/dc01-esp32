@@ -64,6 +64,8 @@ typedef struct {
 	
 void loop_wait_on_interrupt(uint32_t max_tickets)
 {
+	if(max_tickets==0) return;
+	
 	uint32_t ticks1=xTaskGetTickCount(),ticks2=0,io_num=0;
 	do
 	{		
@@ -78,6 +80,7 @@ void loop_wait_on_interrupt(uint32_t max_tickets)
 		uart_util_queue();
 		rs485_util_queue();
 		ultrasonic_queue();
+		util_delay_ms(20);
 		ticks2 = xTaskGetTickCount();
 		ticks2=ticks2>=ticks1?ticks2-ticks1:0xffffffff-ticks1+ticks2;
 	}while(max_tickets>ticks2);	

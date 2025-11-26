@@ -220,7 +220,7 @@ void mqtt_init(void)
 	esp_mqtt_client_config_t mqtt_cfg = {0};
     mqtt_cfg.broker.address.uri = mqtt_url;
     mqtt_cfg.broker.address.port = mqtt_port;
-    if(mqtt_hint_name!=NULL && strlen(mqtt_hint_name) > 0)
+    if(mqtt_hint_name!=NULL && strlen(mqtt_hint_name) > 1)
     {
 		static psk_hint_key_t psk_hint_key = {0};
 		psk_hint_key.key = mqtt_hint_key_bytes;
@@ -229,7 +229,7 @@ void mqtt_init(void)
 		psk_hint_key.hint = mqtt_hint_name;
 		mqtt_cfg.broker.verification.psk_hint_key = &psk_hint_key;
 	}
-	if(mqtt_user!=NULL && strlen(mqtt_user)>0 && mqtt_password!=NULL && strlen(mqtt_password) > 0)
+	if(mqtt_user!=NULL && strlen(mqtt_user)>1 && mqtt_password!=NULL && strlen(mqtt_password) > 1)
 	{
 		mqtt_cfg.credentials.username = mqtt_user;
         mqtt_cfg.credentials.authentication.password = mqtt_password;

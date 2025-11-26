@@ -14,10 +14,10 @@ void define_user_config(void)
 #ifdef CONFIG_ALL_ON
     define_number_variable(MODULE_META,CONFIG_META_ONOFF,"meta_onoff",1,sizeof(uint8_t),0,CONFIG_NUMBER_ENUM,2,0,1);
     define_number_variable(MODULE_META,CONFIG_META_UPLOAD_INTERVAL_SECONDS,"meta_upload_interval_seconds",100,sizeof(uint32_t),0,CONFIG_NUMBER_NORMAL,2,0,0xffffffff);    
-   	define_number_variable(MODULE_ADC_BAT,CONFIG_ADC_BAT_ONOFF,"adc_bat_onoff",1,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,2,0,1);
+   	define_number_variable(MODULE_ADC_BAT,CONFIG_ADC_BAT_ONOFF,"adc_bat_onoff",0,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,2,0,1);
    	define_number_variable(MODULE_ADC_BAT,CONFIG_ADC_BAT_PARTIAL_PRESSURE,"adc_bat_partial_pressure",5000,sizeof(uint32_t),0,CONFIG_NUMBER_NORMAL,2,1,0xffffffff); 
     define_number_variable(MODULE_ADC_BAT,CONFIG_ADC_BAT_UPLOAD_INTERVAL_SECONDS,"adc_bat_upload_interval_seconds",100,sizeof(uint32_t),0,CONFIG_NUMBER_NORMAL,2,0,0xffffffff);  
-    define_number_variable(MODULE_LORA,CONFIG_LORA_MODE,"lora_mode",1,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,2,0,1);//0 off,1 rx
+    define_number_variable(MODULE_LORA,CONFIG_LORA_MODE,"lora_mode",0,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,2,0,1);//0 off,1 rx
     define_number_variable(MODULE_LORA,CONFIG_LORA_FRE,"lora_fre",433000000,sizeof(uint32_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,300000000,990000000);
     define_number_variable(MODULE_LORA,CONFIG_LORA_TX_OUTPUT_POWER,"lora_tx_power",1,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,0,3);
     define_number_variable(MODULE_LORA,CONFIG_LORA_BANDWIDTH,"lora_bandwidth",1,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,4,0,1,2,3);
@@ -35,7 +35,7 @@ void define_user_config(void)
     define_number_variable(MODULE_UART,CONFIG_UART_BAUD_RATE,"uart_baud_rate",115200,sizeof(uint32_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,1000,800000);
     define_number_variable(MODULE_UART,CONFIG_UART_TX_PIN,"uart_tx_pin",21,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,0,48);
     define_number_variable(MODULE_UART,CONFIG_UART_RX_PIN,"uart_rx_pin",2,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,0,48);
-    define_number_variable(MODULE_GPIO,CONFIG_GPIO_ONOFF,"gpio_onoff",1,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,2,0,1);
+    define_number_variable(MODULE_GPIO,CONFIG_GPIO_ONOFF,"gpio_onoff",0,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,2,0,1);
     define_number_variable(MODULE_GPIO,CONFIG_GPIO_UPLOAD_INTERVAL_SECONDS,"gpio_upload_interval_seconds",100,sizeof(uint32_t),0,CONFIG_NUMBER_NORMAL,2,0,0xffffffff);
 	define_number_variable(MODULE_GPIO,CONFIG_GPIO_ESP_4 ,"config_gpio_esp_4",0,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,18,1,2,30,31,32,33,40,41,42,50,51,52,60,61,62,70,71,72);
 	define_number_variable(MODULE_GPIO,CONFIG_GPIO_ESP_5 ,"config_gpio_esp_5",0,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,18,1,2,30,31,32,33,40,41,42,50,51,52,60,61,62,70,71,72); 
@@ -94,13 +94,13 @@ void define_user_config(void)
     define_number_variable(MODULE_WIFI,CONFIG_WIFI_AP_SSID_HIDDEN,"wifi_ap_ssid_hidden",0,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,2,0,1);
     define_number_variable(MODULE_WIFI,CONFIG_WIFI_AP_DNS_UPDATE_SECONDS,"wifi_ap_dns_update_seconds",20,sizeof(uint32_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,1,0xffffffff);
     define_string_variable(MODULE_WIFI,CONFIG_WIFI_AP_DNS_DEFAULT,"wifi_ap_dns_default","0",50,CONFIG_FLAG_REBOOT,CONFIG_STRING_IP_URL,0,49);
-    define_number_variable(MODULE_TM7705,CONFIG_TM7705_ONOFF,"tm7705_onoff",1,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,2,0,1);
+    define_number_variable(MODULE_TM7705,CONFIG_TM7705_ONOFF,"tm7705_onoff",0,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,2,0,1);
     define_number_variable(MODULE_TM7705,CONFIG_TM7705_UPLOAD_INTERVAL_SECONDS,"tm7705_upload_interval_seconds",100,sizeof(uint32_t),0,CONFIG_NUMBER_NORMAL,2,0,0xffffffff);
     define_number_variable(MODULE_TM7705,CONFIG_TM7705_PINS_ONOFF,"tm7705_pins_onoff",3,sizeof(uint8_t),0,CONFIG_NUMBER_NORMAL,2,0,3);
     define_number_variable(MODULE_TM7705,CONFIG_TM7705_INIT_TIMES,"tm7705_init_times",2,sizeof(uint16_t),0,CONFIG_NUMBER_NORMAL,2,1,300);
     define_number_variable(MODULE_TM7705,CONFIG_TM7705_REG_FREQ,"tm7705_reg_freq",0x04,sizeof(uint8_t),0,CONFIG_NUMBER_NORMAL,2,0,255);
     define_number_variable(MODULE_TM7705,CONFIG_TM7705_REG_CONFIG,"tm7705_reg_config",0x64,sizeof(uint8_t),0,CONFIG_NUMBER_NORMAL,2,0,255);
-    define_number_variable(MODULE_CAMERA,CONFIG_CAMERA_ONOFF,"camera_onoff",1,sizeof(uint8_t),0,CONFIG_NUMBER_ENUM,2,0,1);
+    define_number_variable(MODULE_CAMERA,CONFIG_CAMERA_ONOFF,"camera_onoff",0,sizeof(uint8_t),0,CONFIG_NUMBER_ENUM,2,0,1);
     define_number_variable(MODULE_CAMERA,CONFIG_CAMERA_UPLOAD_INTERVAL_SECONDS,"camera_upload_interval_seconds",200,sizeof(uint32_t),0,CONFIG_NUMBER_NORMAL,2,0,0xffffffff);
     define_number_variable(MODULE_CAMERA,CONFIG_CAMERA_SIZE,"camera_size",21,sizeof(uint8_t),0,CONFIG_NUMBER_NORMAL,2,0,24);
     define_number_variable(MODULE_CAMERA,CONFIG_CAMERA_QUALITY,"camera_quality",45,sizeof(uint8_t),0,CONFIG_NUMBER_NORMAL,2,0,63);
@@ -113,19 +113,19 @@ void define_user_config(void)
     define_string_variable(MODULE_W5500,CONFIG_W5500_DNS2,"w5500_dns2","8.8.8.8",16,CONFIG_FLAG_REBOOT,CONFIG_STRING_IP_V4,7,15);
     define_number_variable(MODULE_CONFIG,CONFIG_CONFIG_UPLOAD_ONOFF,"config_upload_onoff",1,sizeof(uint8_t),0,CONFIG_NUMBER_ENUM,2,0,1);
     define_number_variable(MODULE_CONFIG,CONFIG_CONFIG_UPLOAD_INTERVAL_SECONDS,"config_upload_interval_seconds",200,sizeof(uint32_t),0,CONFIG_NUMBER_NORMAL,2,0,0xffffffff);
-	define_number_variable(MODULE_FORWARD,CONFIG_FORWARD_UPLOAD_ONOFF,"forward_onoff",1,sizeof(uint8_t),0,CONFIG_NUMBER_ENUM,2,0,1);
+	define_number_variable(MODULE_FORWARD,CONFIG_FORWARD_UPLOAD_ONOFF,"forward_onoff",0,sizeof(uint8_t),0,CONFIG_NUMBER_ENUM,2,0,1);
     define_number_variable(MODULE_FORWARD,CONFIG_FORWARD_UPLOAD_INTERVAL_SECONDS,"forward_upload_interval_seconds",200,sizeof(uint32_t),0,CONFIG_NUMBER_NORMAL,2,0,0xffffffff);
     define_number_variable(MODULE_AHT20,CONFIG_AHT20_ONOFF,"aht20_onoff",1,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,2,0,1);
-    define_number_variable(MODULE_AHT20,CONFIG_AHT20_UPLOAD_INTERVAL_SECONDS,"aht20_upload_interval_seconds",100,sizeof(uint32_t),0,CONFIG_NUMBER_NORMAL,2,0,0xffffffff);
-    define_number_variable(MODULE_SPL06,CONFIG_SPL06_ONOFF,"spl06_onoff",1,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,2,0,1);
+    define_number_variable(MODULE_AHT20,CONFIG_AHT20_UPLOAD_INTERVAL_SECONDS,"aht20_upload_interval_seconds",60,sizeof(uint32_t),0,CONFIG_NUMBER_NORMAL,2,0,0xffffffff);
+    define_number_variable(MODULE_SPL06,CONFIG_SPL06_ONOFF,"spl06_onoff",0,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,2,0,1);
     define_number_variable(MODULE_SPL06,CONFIG_SPL06_UPLOAD_INTERVAL_SECONDS,"spl06_upload_interval_seconds",100,sizeof(uint32_t),0,CONFIG_NUMBER_NORMAL,2,0,0xffffffff);
     define_number_variable(MODULE_BLE,CONFIG_BLE_PASSWORD,"ble_password",237689,sizeof(uint32_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,0,999999);
-    define_number_variable(MODULE_RS485,CONFIG_RS485_ONOFF,"rs485_onoff",1,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,2,0,1);
+    define_number_variable(MODULE_RS485,CONFIG_RS485_ONOFF,"rs485_onoff",0,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,2,0,1);
     define_number_variable(MODULE_RS485,CONFIG_RS485_UPLOAD_INTERVAL_SECONDS,"rs485_upload_interval_seconds",100,sizeof(uint32_t),0,CONFIG_NUMBER_NORMAL,2,0,0xffffffff);
     define_number_variable(MODULE_RS485,CONFIG_RS485_BAUD_RATE,"rs485_baud_rate",115200,sizeof(uint32_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,1000,800000);
     define_number_variable(MODULE_RS485,CONFIG_RS485_TX_PIN,"rs485_tx_pin",21,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,0,48);
     define_number_variable(MODULE_RS485,CONFIG_RS485_RX_PIN,"rs485_rx_pin",2,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,0,48);
-    define_number_variable(MODULE_PIR,CONFIG_PIR_MODE,"pir_mode",1,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,4,0,1,2,3);
+    define_number_variable(MODULE_PIR,CONFIG_PIR_MODE,"pir_mode",0,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,4,0,1,2,3);
     define_number_variable(MODULE_PIR,CONFIG_PIR_UPLOAD_INTERVAL_SECONDS,"pir_upload_interval_seconds",200,sizeof(uint32_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,0,0xffffffff);
     define_number_variable(MODULE_PIR,CONFIG_PIR_VALID_TIMES,"pir_valid_times",0,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,0,255);   
     define_number_variable(MODULE_PIR,CONFIG_PIR_NOT_REPEAT_UPLOAD_SECONDS,"pir_not_repeat_upload_seconds",0,sizeof(uint32_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,0,0xffffffff);
@@ -133,11 +133,11 @@ void define_user_config(void)
     define_number_variable(MODULE_PIR,CONFIG_PIR_ACTION,"pir_action",0,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,0,255);
     define_number_variable(MODULE_PIR,CONFIG_PIR_ACTION_TIMES,"pir_action_times",3,sizeof(uint32_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,0,0xffffffff);
     define_number_variable(MODULE_PIR,CONFIG_PIR_ACTION_INTERVAL_SECONDS,"pir_action_interval_seconds",2,sizeof(uint32_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,0,0xffffffff);
-    define_number_variable(MODULE_THERMAL,CONFIG_THERMAL_ONOFF,"thermal_onoff",1,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,2,0,1);
+    define_number_variable(MODULE_THERMAL,CONFIG_THERMAL_ONOFF,"thermal_onoff",0,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,2,0,1);
     define_number_variable(MODULE_THERMAL,CONFIG_THERMAL_UPLOAD_INTERVAL_SECONDS,"thermal_upload_interval_seconds",100,sizeof(uint32_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,0,0xffffffff);
     define_number_variable(MODULE_THERMAL,CONFIG_THERMAL_EMISSIVITY,"thermal_emissivity",95,sizeof(uint32_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,0,0xffffffff);
     define_number_variable(MODULE_THERMAL,CONFIG_THERMAL_SHIFT,"thermal_shift",800,sizeof(uint32_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,0,0xffffffff);
-    define_number_variable(MODULE_ULTRASONIC,CONFIG_ULTRASONIC_ONOFF,"ultrasonic_onoff",1,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,2,0,1);
+    define_number_variable(MODULE_ULTRASONIC,CONFIG_ULTRASONIC_ONOFF,"ultrasonic_onoff",0,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_ENUM,2,0,1);
     define_number_variable(MODULE_ULTRASONIC,CONFIG_ULTRASONIC_UPLOAD_INTERVAL_SECONDS,"ultrasonic_upload_interval_seconds",100,sizeof(uint32_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,0,0xffffffff);
     define_number_variable(MODULE_ULTRASONIC,CONFIG_ULTRASONIC_PIN_TRIG,"ultrasonic_pin_trig",16,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,0,0xffff);
  	define_number_variable(MODULE_ULTRASONIC,CONFIG_ULTRASONIC_PIN_ECHO,"ultrasonic_pin_echo",1,sizeof(uint8_t),CONFIG_FLAG_REBOOT,CONFIG_NUMBER_NORMAL,2,0,0xffff);
